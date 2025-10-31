@@ -10,8 +10,19 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
+      # Step 1: Checkout the code from the main branch
       - uses: actions/checkout@v4
-      - run: npm run build
+      
+      # VITAL FIX: Install all Node.js dependencies (React, Vite, etc.)
+      # This fixes the 'vite: not found' error.
+      - name: Install Dependencies
+        run: npm install
+
+      # Step 2: Build the React Application
+      - name: Build Application
+        run: npm run build
+        
+      # Step 3: Deploy the 'build' folder to Firebase Hosting (Live Channel)
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
