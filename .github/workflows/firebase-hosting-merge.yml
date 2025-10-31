@@ -12,20 +12,19 @@ jobs:
       # Step 1: Checkout the code from the main branch
       - uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js
+      # Step 2: Set up Node.js environment
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      # Step 3: Install Dependencies
+      # Step 3: Install all Node.js dependencies
       - name: Install Dependencies
         run: npm ci
 
       # Step 4: Build the React Application
       - name: Build Application
         run: npm run build
-        # VITAL FIX: Inject environment variables from Secrets
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
@@ -35,10 +34,10 @@ jobs:
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
           VITE_FIREBASE_DATABASE_URL: ${{ secrets.VITE_FIREBASE_DATABASE_URL }}
 
-      # Step 5: Deploy the 'dist' folder to Firebase Hosting
+      # Step 5: Deploy to Firebase Hosting (Live Channel)
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CIS_AWA_BSIT3EG1_PROJECT }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           channelId: live
           projectId: cis-awa-bsit3eg1-project
