@@ -71,8 +71,8 @@ _Goal: Finalize the design and test cases so developers can start immediately._
 
 | Task                           | Assigned To | Priority | Due Date     | Remarks  |
 | :----------------------------- | :---------- | :------- | :----------- | :------- |
-| **Wireframe Design**           | Jerome      | Done     | Oct 31 (Fri) | **Done** |
-| **Environment Setup**          | Jerome      | Done     | Oct 31 (Fri) | **Done** |
+| **Wireframe Design**           | Jerome      | **High** | Oct 31 (Fri) | **Done** |
+| **Environment Setup**          | Jerome      | **High** | Oct 31 (Fri) | **Done** |
 | **Figma High-Fidelity Design** | Francis     | **High** | Nov 2 (Sun)  | Pending  |
 | **QA - Test Case Creation**    | Giga        | Medium   | Nov 2 (Sun)  | Pending  |
 
