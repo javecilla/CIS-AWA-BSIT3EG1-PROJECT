@@ -10,6 +10,8 @@ import PatientMakeAppointment from '@/pages/Patient/MakeAppointment'
 import StaffPatients from '@/pages/Staff/PatientProfile'
 import StaffAppointments from '@/pages/Staff/RegisterPatient'
 import StaffDashboard from '@/pages/Staff/Dashboard'
+
+import TestRegister from '@/pages/__test__/TestRegister'
 function App() {
   return (
     <>
@@ -39,6 +41,9 @@ function App() {
         <Route path="/register" element={<Register />} />
 
         <Route path="*" element={<Navigate to="/login" replace />} />
+
+        {/* TEST ROUTES */}
+        <Route path="/test/register" element={<TestRegister />} />
       </Routes>
     </>
   )
