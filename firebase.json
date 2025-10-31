@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "cis-awa-bsit3eg1-project",
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
