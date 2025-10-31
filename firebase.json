@@ -6,6 +6,8 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    // VITAL FIX: This rule tells Firebase to serve index.html for ALL requests,
+    // which is necessary for React's client-side routing.
     "rewrites": [
       {
         "source": "**",
