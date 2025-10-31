@@ -7,6 +7,12 @@ on: pull_request # Triggered when a PR is opened, synced, or closed
 
 jobs:
   build_and_deploy:
+    # VITAL FIX D: Add permissions for the GitHub token
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+
     runs-on: ubuntu-latest
     steps:
       # 1. Checkout the code
