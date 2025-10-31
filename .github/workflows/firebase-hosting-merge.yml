@@ -12,22 +12,30 @@ jobs:
       # Step 1: Checkout the code from the main branch
       - uses: actions/checkout@v4
 
-      # VITAL FIX A: Explicitly set up Node.js environment
+      # Step 2: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20" # Use a stable Node version (e.g., 20 or 18)
+          node-version: "20"
 
-      # VITAL FIX B: Install all Node.js dependencies (MUST RUN BEFORE BUILD)
-      # Use 'npm ci' for clean, consistent installation in CI environments
+      # Step 3: Install Dependencies
       - name: Install Dependencies
         run: npm ci
 
-      # Step 2: Build the React Application (This creates the 'build' directory)
+      # Step 4: Build the React Application
       - name: Build Application
         run: npm run build
+        # VITAL FIX: Inject environment variables from Secrets
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_FIREBASE_DATABASE_URL: ${{ secrets.VITE_FIREBASE_DATABASE_URL }}
 
-      # Step 3: Deploy the 'build' folder to Firebase Hosting (Live Channel)
+      # Step 5: Deploy the 'dist' folder to Firebase Hosting
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
