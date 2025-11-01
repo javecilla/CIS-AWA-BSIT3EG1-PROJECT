@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { ref, push, onValue } from 'firebase/database'
 import { db } from '@/firebase/config.js'
+import './FirebaseDatabase.css'
 
-function TestRegister() {
+function FirebaseDatabase() {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [middleName, setMiddleName] = useState('')
@@ -38,7 +39,7 @@ function TestRegister() {
       profile: 'https://placehold.co/150'
     }
 
-    push(ref(db, 'users/'), newPatientData)
+    push(ref(db, 'test/patients/'), newPatientData)
       .then(() => {
         setStatusMessage(
           'Data successfully saved! Real-time list should update.'
@@ -59,7 +60,7 @@ function TestRegister() {
 
   useEffect(() => {
     setIsLoading(true)
-    const usersRef = ref(db, 'users/')
+    const usersRef = ref(db, 'test/patients')
 
     const unsubscribe = onValue(usersRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -87,7 +88,7 @@ function TestRegister() {
       <div className="row g-5">
         <div className="col-lg-5">
           <div className="p-4 border rounded-3 shadow-sm bg-light">
-            <h2 className="h4 mb-4">Test Register - Database Check</h2>
+            <h2 className="h4 mb-4">Test Register - Firebase Database Check</h2>
 
             {statusMessage && (
               <div
@@ -182,7 +183,7 @@ function TestRegister() {
 
         <div className="col-lg-7">
           <h2 className="h4 mb-4">
-            Registered Users{' '}
+            Registered Patients{' '}
             <span className="badge bg-secondary">{userData.length}</span>
           </h2>
 
@@ -230,4 +231,4 @@ function TestRegister() {
   )
 }
 
-export default TestRegister
+export default FirebaseDatabase
