@@ -11,7 +11,9 @@ import StaffPatients from '@/pages/Staff/PatientProfile'
 import StaffAppointments from '@/pages/Staff/RegisterPatient'
 import StaffDashboard from '@/pages/Staff/Dashboard'
 
-import TestRegister from '@/pages/__test__/TestRegister'
+import TestFirebaseDatabase from '@/pages/TestingDemo/FirbaseDatabase'
+import TestFirebaseStorage from '@/pages/TestingDemo/FirebaseStorage'
+import TestFirebaseAuthentication from '@/pages/TestingDemo/FirebaseAuthentication'
 function App() {
   return (
     <>
@@ -43,7 +45,18 @@ function App() {
         <Route path="*" element={<Navigate to="/login" replace />} />
 
         {/* TEST ROUTES */}
-        <Route path="/test/register" element={<TestRegister />} />
+        <Route
+          path="/test-demo/firebase-database"
+          element={<TestFirebaseDatabase />}
+        />
+        <Route
+          path="/test-demo/firebase-storage"
+          element={<TestFirebaseStorage />}
+        />
+        <Route
+          path="/test-demo/firebase-authentication"
+          element={<TestFirebaseAuthentication />}
+        />
       </Routes>
     </>
   )
