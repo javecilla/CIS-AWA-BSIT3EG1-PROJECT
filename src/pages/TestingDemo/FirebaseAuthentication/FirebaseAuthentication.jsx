@@ -1,117 +1,117 @@
-import React, { useState, useEffect } from 'react'
-import { auth } from '@/firebase/config.js'
+import React, { useState, useEffect } from "react";
+import { auth } from "@/firebase/config.js";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
-} from 'firebase/auth'
-import './FirebaseAuthentication.css'
+  onAuthStateChanged,
+} from "firebase/auth";
+import "./FirebaseAuthentication.css";
 
 function FirebaseAuthentication() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [currentUser, setCurrentUser] = useState(null)
+  const [currentUser, setCurrentUser] = useState(null);
 
-  const [authIsLoading, setAuthIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [statusMessage, setStatusMessage] = useState('')
-  const [isError, setIsError] = useState(false)
+  const [authIsLoading, setAuthIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    setStatusMessage('Connecting to Firebase Auth...')
+    setStatusMessage("Connecting to Firebase Auth...");
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setCurrentUser(user)
-        setStatusMessage('User is logged in.')
-        setIsError(false)
+        setCurrentUser(user);
+        setStatusMessage("User is logged in.");
+        setIsError(false);
       } else {
-        setCurrentUser(null)
-        setStatusMessage('User is logged out.')
-        setIsError(false)
+        setCurrentUser(null);
+        setStatusMessage("User is logged out.");
+        setIsError(false);
       }
 
-      setAuthIsLoading(false)
-    })
+      setAuthIsLoading(false);
+    });
 
-    return () => unsubscribe()
-  }, [])
+    return () => unsubscribe();
+  }, []);
 
   const handleRegister = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!email || !password) {
-      setStatusMessage('Email and password are required.')
-      setIsError(true)
-      return
+      setStatusMessage("Email and password are required.");
+      setIsError(true);
+      return;
     }
 
-    setIsSubmitting(true)
-    setIsError(false)
-    setStatusMessage('Attempting to register...')
+    setIsSubmitting(true);
+    setIsError(false);
+    setStatusMessage("Attempting to register...");
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
-      )
-      console.log('FIREBASE REGISTERED USER:', userCredential)
-      setStatusMessage('Registration successful! You are now logged in.')
+      );
+      console.log("FIREBASE REGISTERED USER:", userCredential);
+      setStatusMessage("Registration successful! You are now logged in.");
     } catch (error) {
-      console.error('FIREBASE REGISTER ERROR:', error.message)
-      setStatusMessage(`Registration Failed: ${error.message}`)
-      setIsError(true)
+      console.error("FIREBASE REGISTER ERROR:", error.message);
+      setStatusMessage(`Registration Failed: ${error.message}`);
+      setIsError(true);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleLogin = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!email || !password) {
-      setStatusMessage('Email and password are required.')
-      setIsError(true)
-      return
+      setStatusMessage("Email and password are required.");
+      setIsError(true);
+      return;
     }
 
-    setIsSubmitting(true)
-    setIsError(false)
-    setStatusMessage('Attempting to log in...')
+    setIsSubmitting(true);
+    setIsError(false);
+    setStatusMessage("Attempting to log in...");
 
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
         password
-      )
-      console.log('FIREBASE LOGGED IN USER:', userCredential)
-      setStatusMessage('Login successful!')
+      );
+      console.log("FIREBASE LOGGED IN USER:", userCredential);
+      setStatusMessage("Login successful!");
     } catch (error) {
-      console.error('FIREBASE LOGIN ERROR:', error.message)
-      setStatusMessage(`Login Failed: ${error.message}`)
-      setIsError(true)
+      console.error("FIREBASE LOGIN ERROR:", error.message);
+      setStatusMessage(`Login Failed: ${error.message}`);
+      setIsError(true);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleLogout = async () => {
-    setIsSubmitting(true)
-    setStatusMessage('Logging out...')
+    setIsSubmitting(true);
+    setStatusMessage("Logging out...");
     try {
-      await signOut(auth)
-      setStatusMessage('Logout successful.')
-      setEmail('')
-      setPassword('')
+      await signOut(auth);
+      setStatusMessage("Logout successful.");
+      setEmail("");
+      setPassword("");
     } catch (error) {
-      console.error('FIREBASE LOGOUT ERROR:', error.message)
-      setStatusMessage(`Logout Failed: ${error.message}`)
-      setIsError(true)
+      console.error("FIREBASE LOGOUT ERROR:", error.message);
+      setStatusMessage(`Logout Failed: ${error.message}`);
+      setIsError(true);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   if (authIsLoading) {
     return (
@@ -121,7 +121,7 @@ function FirebaseAuthentication() {
         </div>
         <p className="mt-2">Connecting to Firebase...</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -137,7 +137,7 @@ function FirebaseAuthentication() {
                   <p className="mb-1">
                     <strong>Email:</strong> {currentUser.email}
                   </p>
-                  <p className="mb-0" style={{ wordBreak: 'break-all' }}>
+                  <p className="mb-0" style={{ wordBreak: "break-all" }}>
                     <strong>UID:</strong> {currentUser.uid}
                   </p>
                 </div>
@@ -146,18 +146,20 @@ function FirebaseAuthentication() {
                   onClick={handleLogout}
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'Logging out...' : 'Log Out'}
+                  {isSubmitting ? "Logging out..." : "Log Out"}
                 </button>
               </div>
             ) : (
               /* Show this card if user is LOGGED OUT */
               <div>
-                <h2 className="h4 mb-4">Test Login - Firebase Auth Check</h2>
+                <h2 className="h4 mb-4">
+                  Test Login - Firebase Auth Check EDITED BY MICO
+                </h2>
 
                 {statusMessage && (
                   <div
                     className={`alert ${
-                      isError ? 'alert-danger' : 'alert-info'
+                      isError ? "alert-danger" : "alert-info"
                     }`}
                     role="alert"
                   >
@@ -202,7 +204,7 @@ function FirebaseAuthentication() {
                       onClick={handleLogin}
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? '...' : 'Login'}
+                      {isSubmitting ? "..." : "Login"}
                     </button>
                     <button
                       type="button"
@@ -210,7 +212,7 @@ function FirebaseAuthentication() {
                       onClick={handleRegister}
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? '...' : 'Register'}
+                      {isSubmitting ? "..." : "Register"}
                     </button>
                   </div>
                 </form>
@@ -220,7 +222,7 @@ function FirebaseAuthentication() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default FirebaseAuthentication
+export default FirebaseAuthentication;
