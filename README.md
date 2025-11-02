@@ -61,6 +61,16 @@ This section contains important guides for team members to follow.
 
 ---
 
+## Project Resources
+
+This sections contains our project resources used to aid development and design.
+
+- **[Wireframe Designs](https://excalidraw.com/#room=81adb652c51e26818072,29B5pKuXJoM1Gt1EPqmjnA)**: Link to the Excalidraw file containing low-fidelity wireframe designs.
+- **[Figma High-Fidelity Designs](https://www.figma.com/design/ZY2Ec51xEQIfx4Yuc5eV5I/Animal-bite-center?node-id=51-1137&t=0s8vmax7sh2RP9d6-0)**: Access to the Figma file containing high-fidelity designs and prototypes.
+- **[Teams Documentation](https://drive.google.com/drive/folders/12uM7-GUV4gfsy8Vm_V6-DwOuxgso-3OV?usp=drive_link)**: Google Drive folder containing all project-related documents, including test cases, design files, and meeting notes.
+
+---
+
 ## Sprint Development Plan
 
 The development is organized into sprints to ensure timely delivery of features within the project deadline of November 14.
