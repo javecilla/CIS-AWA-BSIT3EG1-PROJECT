@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { ref, push, onValue } from 'firebase/database'
 import { db } from '@/firebase/config.js'
 import './FirebaseDatabase.css'
+import ReCAPTCHA from 'react-google-recaptcha'
 
 function FirebaseDatabase() {
   const [firstName, setFirstName] = useState('')
@@ -15,11 +16,33 @@ function FirebaseDatabase() {
   const [isError, setIsError] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
+  const [recaptchaToken, setRecaptchaToken] = useState(null)
+  const recaptchaRef = useRef(null)
+  const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_FRONTEND_KEY
+
+  const resetForm = () => {
+    setFirstName('')
+    setLastName('')
+    setMiddleName('')
+    setSuffixName('')
+    setEmail('')
+    if (recaptchaRef.current) {
+      recaptchaRef.current.reset()
+    }
+    setRecaptchaToken(null)
+  }
+
   const handleRegister = (e) => {
     e.preventDefault()
 
     if (!firstName || !lastName || !email) {
       setStatusMessage('Error: First Name, Last Name, and Email are required.')
+      setIsError(true)
+      return
+    }
+
+    if (!recaptchaToken) {
+      setStatusMessage('Please check the "I\'m not a robot" box.')
       setIsError(true)
       return
     }
@@ -45,16 +68,17 @@ function FirebaseDatabase() {
           'Data successfully saved! Real-time list should update.'
         )
         setIsError(false)
-        setFirstName('')
-        setLastName('')
-        setMiddleName('')
-        setSuffixName('')
-        setEmail('')
+        resetForm()
       })
       .catch((error) => {
         console.error('FIREBASE WRITE ERROR:', error)
         setStatusMessage('WRITE FAILED! Check console for errors.')
         setIsError(true)
+
+        if (recaptchaRef.current) {
+          recaptchaRef.current.reset()
+        }
+        setRecaptchaToken(null)
       })
   }
 
@@ -72,9 +96,9 @@ function FirebaseDatabase() {
           })
         })
         setUserData(usersArray.reverse())
-        console.log('User data updated:', usersArray)
+        // console.log('User data updated:', usersArray);
       } else {
-        console.log('No user data found')
+        // console.log('No user data found');
         setUserData([])
       }
       setIsLoading(false)
@@ -103,6 +127,7 @@ function FirebaseDatabase() {
 
             <form onSubmit={handleRegister}>
               <div className="row g-2 mb-3">
+                {/* --- First Name --- */}
                 <div className="col-sm-6">
                   <label htmlFor="firstName" className="form-label small">
                     First Name
@@ -117,6 +142,7 @@ function FirebaseDatabase() {
                     required
                   />
                 </div>
+                {/* --- Last Name --- */}
                 <div className="col-sm-6">
                   <label htmlFor="lastName" className="form-label small">
                     Last Name
@@ -131,6 +157,7 @@ function FirebaseDatabase() {
                     required
                   />
                 </div>
+                {/* --- Middle Name --- */}
                 <div className="col-sm-8">
                   <label htmlFor="middleName" className="form-label small">
                     Middle Name
@@ -144,6 +171,7 @@ function FirebaseDatabase() {
                     placeholder="Middle Name (Optional)"
                   />
                 </div>
+                {/* --- Suffix --- */}
                 <div className="col-sm-4">
                   <label htmlFor="suffixName" className="form-label small">
                     Suffix
@@ -159,6 +187,7 @@ function FirebaseDatabase() {
                 </div>
               </div>
 
+              {/* --- Email --- */}
               <div className="mb-3">
                 <label htmlFor="email" className="form-label small">
                   Email
@@ -174,6 +203,15 @@ function FirebaseDatabase() {
                 />
               </div>
 
+              <div className="mb-3 d-flex justify-content-center">
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  sitekey={recaptchaSiteKey}
+                  onChange={(token) => setRecaptchaToken(token)}
+                  onExpired={() => setRecaptchaToken(null)}
+                />
+              </div>
+
               <button type="submit" className="btn btn-primary w-100">
                 Register Patient Data
               </button>
@@ -181,6 +219,7 @@ function FirebaseDatabase() {
           </div>
         </div>
 
+        {/* --- User Data Display Column --- */}
         <div className="col-lg-7">
           <h2 className="h4 mb-4">
             Registered Patients{' '}

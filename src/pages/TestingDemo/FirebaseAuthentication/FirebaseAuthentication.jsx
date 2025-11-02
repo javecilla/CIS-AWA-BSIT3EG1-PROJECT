@@ -1,117 +1,146 @@
-import React, { useState, useEffect } from "react";
-import { auth } from "@/firebase/config.js";
+import React, { useState, useEffect, useRef } from 'react'
+import { auth } from '@/firebase/config.js'
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged,
-} from "firebase/auth";
-import "./FirebaseAuthentication.css";
+  onAuthStateChanged
+} from 'firebase/auth'
+import ReCAPTCHA from 'react-google-recaptcha'
+import './FirebaseAuthentication.css'
 
 function FirebaseAuthentication() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [currentUser, setCurrentUser] = useState(null)
+  const [authIsLoading, setAuthIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [statusMessage, setStatusMessage] = useState('')
+  const [isError, setIsError] = useState(false)
 
-  const [currentUser, setCurrentUser] = useState(null);
+  const [recaptchaToken, setRecaptchaToken] = useState(null)
+  const recaptchaRef = useRef(null)
 
-  const [authIsLoading, setAuthIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [isError, setIsError] = useState(false);
+  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_FRONTEND_KEY
 
   useEffect(() => {
-    setStatusMessage("Connecting to Firebase Auth...");
+    setStatusMessage('Connecting to Firebase Auth...')
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setCurrentUser(user);
-        setStatusMessage("User is logged in.");
-        setIsError(false);
+        setCurrentUser(user)
+        setStatusMessage('User is logged in.')
+        setIsError(false)
       } else {
-        setCurrentUser(null);
-        setStatusMessage("User is logged out.");
-        setIsError(false);
+        setCurrentUser(null)
+        setStatusMessage('User is logged out.')
+        setIsError(false)
       }
+      setAuthIsLoading(false)
+    })
+    return () => unsubscribe()
+  }, [])
 
-      setAuthIsLoading(false);
-    });
+  const resetForm = () => {
+    setEmail('')
+    setPassword('')
+    if (recaptchaRef.current) {
+      recaptchaRef.current.reset() // Resets the reCAPTCHA box
+    }
+    setRecaptchaToken(null)
+  }
 
-    return () => unsubscribe();
-  }, []);
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
+  const validateForm = () => {
     if (!email || !password) {
-      setStatusMessage("Email and password are required.");
-      setIsError(true);
-      return;
+      setStatusMessage('Email and password are required.')
+      setIsError(true)
+      return false
     }
 
-    setIsSubmitting(true);
-    setIsError(false);
-    setStatusMessage("Attempting to register...");
+    if (!recaptchaToken) {
+      setStatusMessage('Please check the "I\'m not a robot" box.')
+      setIsError(true)
+      return false
+    }
+    return true
+  }
+
+  const handleRegister = async (e) => {
+    e.preventDefault()
+    if (!validateForm()) return
+
+    setIsSubmitting(true)
+    setIsError(false)
+    setStatusMessage('Attempting to register...')
 
     try {
+      // NOTE: For full security, you should send the 'recaptchaToken'
+      // to your backend (like a Firebase Function) to verify it
+      // using your VITE_RECAPTCHA_BACKEND_KEY before creating a user.
+      // This code only checks if the *frontend* box was ticked.
+
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
-      );
-      console.log("FIREBASE REGISTERED USER:", userCredential);
-      setStatusMessage("Registration successful! You are now logged in.");
+      )
+      console.log('FIREBASE REGISTERED USER:', userCredential.user)
+      setStatusMessage('Registration successful! You are now logged in.')
+      resetForm()
     } catch (error) {
-      console.error("FIREBASE REGISTER ERROR:", error.message);
-      setStatusMessage(`Registration Failed: ${error.message}`);
-      setIsError(true);
+      console.error('FIREBASE REGISTER ERROR:', error.message)
+      setStatusMessage(`Registration Failed: ${error.message}`)
+      setIsError(true)
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    if (!email || !password) {
-      setStatusMessage("Email and password are required.");
-      setIsError(true);
-      return;
-    }
+    e.preventDefault()
+    if (!validateForm()) return
 
-    setIsSubmitting(true);
-    setIsError(false);
-    setStatusMessage("Attempting to log in...");
+    setIsSubmitting(true)
+    setIsError(false)
+    setStatusMessage('Attempting to log in...')
 
     try {
+      // NOTE: See security note in handleRegister
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
         password
-      );
-      console.log("FIREBASE LOGGED IN USER:", userCredential);
-      setStatusMessage("Login successful!");
+      )
+      console.log('FIREBASE LOGGED IN USER:', userCredential.user)
+      setStatusMessage('Login successful!')
     } catch (error) {
-      console.error("FIREBASE LOGIN ERROR:", error.message);
-      setStatusMessage(`Login Failed: ${error.message}`);
-      setIsError(true);
+      console.error('FIREBASE LOGIN ERROR:', error.message)
+      setStatusMessage(`Login Failed: ${error.message}`)
+      setIsError(true)
+      // Reset reCAPTCHA on failed login
+      if (recaptchaRef.current) {
+        recaptchaRef.current.reset()
+      }
+      setRecaptchaToken(null)
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   const handleLogout = async () => {
-    setIsSubmitting(true);
-    setStatusMessage("Logging out...");
+    setIsSubmitting(true)
+    setStatusMessage('Logging out...')
     try {
-      await signOut(auth);
-      setStatusMessage("Logout successful.");
-      setEmail("");
-      setPassword("");
+      await signOut(auth)
+      setStatusMessage('Logout successful.')
+      resetForm()
     } catch (error) {
-      console.error("FIREBASE LOGOUT ERROR:", error.message);
-      setStatusMessage(`Logout Failed: ${error.message}`);
-      setIsError(true);
+      console.error('FIREBASE LOGOUT ERROR:', error.message)
+      setStatusMessage(`Logout Failed: ${error.message}`)
+      setIsError(true)
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   if (authIsLoading) {
     return (
@@ -121,7 +150,7 @@ function FirebaseAuthentication() {
         </div>
         <p className="mt-2">Connecting to Firebase...</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -129,15 +158,15 @@ function FirebaseAuthentication() {
       <div className="row justify-content-center">
         <div className="col-lg-6">
           <div className="p-4 border rounded-3 shadow-sm bg-light">
-            {/* Show this card if user is LOGGED IN */}
             {currentUser ? (
+              // --- LOGGED IN VIEW ---
               <div>
                 <h2 className="h4 mb-3">Auth Status: Logged In</h2>
                 <div className="alert alert-success">
                   <p className="mb-1">
                     <strong>Email:</strong> {currentUser.email}
                   </p>
-                  <p className="mb-0" style={{ wordBreak: "break-all" }}>
+                  <p className="mb-0" style={{ wordBreak: 'break-all' }}>
                     <strong>UID:</strong> {currentUser.uid}
                   </p>
                 </div>
@@ -146,20 +175,18 @@ function FirebaseAuthentication() {
                   onClick={handleLogout}
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Logging out..." : "Log Out"}
+                  {isSubmitting ? 'Logging out...' : 'Log Out'}
                 </button>
               </div>
             ) : (
-              /* Show this card if user is LOGGED OUT */
+              // --- LOGGED OUT VIEW ---
               <div>
-                <h2 className="h4 mb-4">
-                  Test Login - Firebase Auth Check EDITED BY MICO
-                </h2>
+                <h2 className="h4 mb-4">Test Login - Firebase Auth Check</h2>
 
                 {statusMessage && (
                   <div
                     className={`alert ${
-                      isError ? "alert-danger" : "alert-info"
+                      isError ? 'alert-danger' : 'alert-info'
                     }`}
                     role="alert"
                   >
@@ -167,7 +194,7 @@ function FirebaseAuthentication() {
                   </div>
                 )}
 
-                <form>
+                <form onSubmit={handleLogin}>
                   <div className="mb-3">
                     <label htmlFor="authEmail" className="form-label small">
                       Email
@@ -197,14 +224,23 @@ function FirebaseAuthentication() {
                     />
                   </div>
 
+                  <div className="mb-3 d-flex justify-content-center">
+                    <ReCAPTCHA
+                      ref={recaptchaRef}
+                      sitekey={RECAPTCHA_SITE_KEY}
+                      onChange={(token) => setRecaptchaToken(token)}
+                      onExpired={() => setRecaptchaToken(null)}
+                    />
+                  </div>
+
                   <div className="d-grid gap-2">
                     <button
-                      type="button"
+                      type="submit"
                       className="btn btn-primary"
                       onClick={handleLogin}
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? "..." : "Login"}
+                      {isSubmitting ? '...' : 'Login'}
                     </button>
                     <button
                       type="button"
@@ -212,7 +248,7 @@ function FirebaseAuthentication() {
                       onClick={handleRegister}
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? "..." : "Register"}
+                      {isSubmitting ? '...' : 'Register'}
                     </button>
                   </div>
                 </form>
@@ -222,7 +258,7 @@ function FirebaseAuthentication() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default FirebaseAuthentication;
+export default FirebaseAuthentication
