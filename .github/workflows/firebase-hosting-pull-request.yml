@@ -37,6 +37,15 @@ jobs:
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
           VITE_FIREBASE_DATABASE_URL: ${{ secrets.VITE_FIREBASE_DATABASE_URL }}
 
+          VITE_RECAPTCHA_FRONTEND_KEY: ${{ secrets.VITE_RECAPTCHA_FRONTEND_KEY }}
+          VITE_RECAPTCHA_BACKEND_KEY: ${{ secrets.VITE_RECAPTCHA_BACKEND_KEY }}
+
+          VITE_EMAILJS_SERVICE_ID: ${{ secrets.VITE_EMAILJS_SERVICE_ID }}
+          VITE_EMAILJS_TEST_TEMPLATE_ID: ${{ secrets.VITE_EMAILJS_TEST_TEMPLATE_ID }}
+          VITE_EMAILJS_PUBLIC_API_KEY: ${{ secrets.VITE_EMAILJS_PUBLIC_API_KEY }}
+          VITE_EMAILJS_PRIVATE_API_KEY: ${{ secrets.VITE_EMAILJS_PRIVATE_API_KEY }}
+          VITE_EMAILJS_SENDER_MAIL: ${{ secrets.VITE_EMAILJS_SENDER_MAIL }}
+
       # 5. Deploy to Firebase Hosting Preview Channel
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
