@@ -80,6 +80,7 @@ function SendEmail() {
       <div className="row justify-content-center">
         <div className="col-lg-6">
           <div className="p-4 border rounded-3 shadow-sm bg-light">
+            <img src="/assets/images/static/abc_logo.png" alt="logo" />
             <h2 className="h4 mb-4">Test EmailJS Integration</h2>
 
             {statusMessage && (
