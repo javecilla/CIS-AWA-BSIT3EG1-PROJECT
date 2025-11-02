@@ -34,6 +34,9 @@ jobs:
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
           VITE_FIREBASE_DATABASE_URL: ${{ secrets.VITE_FIREBASE_DATABASE_URL }}
 
+          VITE_RECAPTCHA_FRONTEND_KEY: ${{ secrets.VITE_RECAPTCHA_FRONTEND_KEY }}
+          VITE_RECAPTCHA_BACKEND_KEY: ${{ secrets.VITE_RECAPTCHA_BACKEND_KEY }}
+
       # Step 5: Deploy to Firebase Hosting (Live Channel)
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
