@@ -35,6 +35,7 @@ This project is built using modern web technologies to ensure a responsive, effi
   - **Database:** Firebase Realtime Database to store and manage all application data.
   - **Storage:** Firebase Storage for user profile pictures.
   - **Hosting:** Firebase Hosting for final deployment.
+- **Email Service:** [EmailJS](https://www.emailjs.com/) for sending email notifications.
 
 ---
 
@@ -74,7 +75,7 @@ _Goal: Finalize the design and test cases so developers can start immediately._
 | **Wireframe Design**           | Jerome      | **High** | Oct 31 (Fri) | **Done** |
 | **Environment Setup**          | Jerome      | **High** | Oct 31 (Fri) | **Done** |
 | **Figma High-Fidelity Design** | Francis     | **High** | Nov 2 (Sun)  | **Done** |
-| **QA - Test Case Creation**    | Giga        | Medium   | Nov 2 (Sun)  | In Progress  |
+| **QA - Test Case Creation**    | Giga        | Medium   | Nov 2 (Sun)  | **Done**  |
 
 ### **Sprint 1: MVP - Core Authentication & Patient Portal (Nov 3 - Nov 8)**
 
