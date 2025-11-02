@@ -17,7 +17,6 @@
     "editorIndentGuide.showInActiveEditor": true
     //"editorIndentGuide.background": "#00000055"
   },
-  //adjust font size
   "editor.fontSize": 14,
   "editor.renderWhitespace": "boundary",
   "editor.suggestSelection": "first",
@@ -42,16 +41,5 @@
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-
-  //support for php
-  "php.validate.executablePath": "C:\\xampp\\php\\php.exe",
-  "php.suggest.basic": false,
-  "php.suggest.completionType": "both",
-  "php.suggest.docblockSnippets": true,
-  "php.suggest.namespaceImports": true,
-  "php.suggest.variableImports": true,
-  "php.validate.php": true,
-  "php.validate.run": "onType",
-  "cSpell.words": ["Avecilla", "Opss", "vueuse"],
   "postman.settings.dotenv-detection-notification-visibility": false
 }
