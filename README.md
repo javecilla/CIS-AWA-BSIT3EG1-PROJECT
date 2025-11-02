@@ -59,6 +59,7 @@ Our team is composed of five members, each with a specific role to ensure the su
 This section contains important guides for team members to follow.
 
 - **[Team Coding Standards](./docs/STANDARDS.md)**: The official rules for file structure, naming conventions, and code style that all developers (Mico, Rensen, Jerome) must follow.
+- **[Project Folder Structure](./docs/PROJECT_STRUCTURE.md)**: A comprehensive guide to our project's directory organization, including detailed explanations of each folder's purpose and best practices for file placement.
 - **[Firebase Setup Guide](./docs/FIREBASE.md)**: A complete guide on how to set up the Firebase project, including Hosting, Realtime Database, and Authentication.
 - **[reCAPTCHA v2 Setup Guide](./docs/RECAPTCHA.md)**: How to add and verify Google reCAPTCHA v2 ("I'm not a robot" checkbox) in the project.
 - **[EmailJS Integration Guide](./docs/EMAILJS.md)**: Instructions for configuring EmailJS and sending emails from the app (includes reCAPTCHA integration example).
@@ -78,7 +79,7 @@ _Goal: Finalize the design and test cases so developers can start immediately._
 | **Wireframe Design**           | Jerome      | **High** | Oct 31 (Fri) | **Done** |
 | **Environment Setup**          | Jerome      | **High** | Oct 31 (Fri) | **Done** |
 | **Figma High-Fidelity Design** | Francis     | **High** | Nov 2 (Sun)  | **Done** |
-| **QA - Test Case Creation**    | Giga        | Medium   | Nov 2 (Sun)  | **Done**  |
+| **QA - Test Case Creation**    | Giga        | Medium   | Nov 2 (Sun)  | **Done** |
 
 ### **Sprint 1: MVP - Core Authentication & Patient Portal (Nov 3 - Nov 8)**
 
@@ -103,7 +104,7 @@ _Goal: Build staff tools, integrate everything, conduct final testing, and submi
 | **BE: Fetch Appointments for Staff View**  | Jerome      | **High** | Nov 10 (Mon) | Pending |
 | **FE: Walk-in Patient Registration Form**  | Mico        | Medium   | Nov 11 (Tue) | Pending |
 | **BE: Staff-side Patient Registration**    | Jerome      | Medium   | Nov 11 (Tue) | Pending |
-| **BE: Firebase Storage for Profile Pics**  | Jerome      | Low   | Nov 12 (Wed) | Pending |
+| **BE: Firebase Storage for Profile Pics**  | Jerome      | Low      | Nov 12 (Wed) | Pending |
 | **QA: Full System Functional Testing**     | Giga        | **High** | Nov 13 (Thu) | Pending |
 | **All Devs: Final Bug Fixing & Polish**    | All Devs    | **High** | Nov 14 (Fri) | Pending |
 | **Final Project Submission**               | Jerome      | **High** | Nov 14 (Fri) | Pending |
@@ -117,4 +118,3 @@ This sections contains our project resources used to aid development and design.
 - **[Wireframe Designs](https://excalidraw.com/#room=81adb652c51e26818072,29B5pKuXJoM1Gt1EPqmjnA)**: Link to the Excalidraw file containing low-fidelity wireframe designs.
 - **[Figma High-Fidelity Designs](https://www.figma.com/design/ZY2Ec51xEQIfx4Yuc5eV5I/Animal-bite-center?node-id=51-1137&t=0s8vmax7sh2RP9d6-0)**: Access to the Figma file containing high-fidelity designs and prototypes.
 - **[Teams Documentation](https://drive.google.com/drive/folders/12uM7-GUV4gfsy8Vm_V6-DwOuxgso-3OV?usp=drive_link)**: Google Drive folder containing all project-related documents, including test cases, design files, and meeting notes.
-

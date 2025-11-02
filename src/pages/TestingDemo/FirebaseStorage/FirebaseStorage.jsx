@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
-import { storage } from '@/firebase/config.js'
+import { storage } from '@/libs/firebase.js'
 import './FirebaseStorage.css'
 
 function FirebaseStorage() {
