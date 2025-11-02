@@ -1,0 +1,15 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer circle (dark blue border) -->
+  <circle cx="100" cy="100" r="95" fill="#03045E"/>
+  
+  <!-- Inner circle (light blue background) -->
+  <circle cx="100" cy="100" r="75" fill="#90E0EF"/>
+  
+  <!-- ABC Text -->
+  <text x="100" y="120" 
+        font-family="Space Grotesk, sans-serif" 
+        font-size="60" 
+        font-weight="700" 
+        fill="#03045E" 
+        text-anchor="middle">ABC</text>
+</svg>

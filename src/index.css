@@ -1,0 +1,74 @@
+@charset "UTF-8";
+
+:root {
+  /* Brand Colors - Primary Palette */
+  --color-primary: #03045e;
+  --color-primary-light: #0077b6;
+  --color-primary-medium: #00b4d8;
+  --color-accent: #90e0ef;
+  --color-accent-light: #caf0f8;
+
+  /* Typography */
+  --font-primary: 'Roboto', sans-serif;
+  --font-secondary: 'Space Grotesk', sans-serif;
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  /* Use Cases */
+  --heading-font: var(--font-secondary);
+  --body-font: var(--font-primary);
+}
+
+::selection {
+  background-color: var(--color-primary);
+  color: var(--color-accent-light);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 2px var(--color-accent);
+  border-radius: 1px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-accent-light);
+  border-radius: 1px;
+  cursor: -webkit-grab;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-light);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  font-family: var(--body-font);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
