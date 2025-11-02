@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { ref, push, onValue } from 'firebase/database'
-import { db } from '@/firebase/config.js'
+import { db } from '@/libs/firebase.js'
 import './FirebaseDatabase.css'
 import ReCAPTCHA from 'react-google-recaptcha'
 
