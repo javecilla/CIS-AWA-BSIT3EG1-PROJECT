@@ -58,8 +58,10 @@ Our team is composed of five members, each with a specific role to ensure the su
 
 This section contains important guides for team members to follow.
 
-- **[Firebase Setup Guide](./docs/FIREBASE.md)**: A complete guide on how to set up the Firebase project, including Hosting, Realtime Database, and Authentication.
 - **[Team Coding Standards](./docs/STANDARDS.md)**: The official rules for file structure, naming conventions, and code style that all developers (Mico, Rensen, Jerome) must follow.
+- **[Firebase Setup Guide](./docs/FIREBASE.md)**: A complete guide on how to set up the Firebase project, including Hosting, Realtime Database, and Authentication.
+- **[reCAPTCHA v2 Setup Guide](./docs/RECAPTCHA.md)**: How to add and verify Google reCAPTCHA v2 ("I'm not a robot" checkbox) in the project.
+- **[EmailJS Integration Guide](./docs/EMAILJS.md)**: Instructions for configuring EmailJS and sending emails from the app (includes reCAPTCHA integration example).
 
 ---
 
@@ -101,7 +103,7 @@ _Goal: Build staff tools, integrate everything, conduct final testing, and submi
 | **BE: Fetch Appointments for Staff View**  | Jerome      | **High** | Nov 10 (Mon) | Pending |
 | **FE: Walk-in Patient Registration Form**  | Mico        | Medium   | Nov 11 (Tue) | Pending |
 | **BE: Staff-side Patient Registration**    | Jerome      | Medium   | Nov 11 (Tue) | Pending |
-| **BE: Firebase Storage for Profile Pics**  | Jerome      | Normal   | Nov 12 (Wed) | Pending |
+| **BE: Firebase Storage for Profile Pics**  | Jerome      | Low   | Nov 12 (Wed) | Pending |
 | **QA: Full System Functional Testing**     | Giga        | **High** | Nov 13 (Thu) | Pending |
 | **All Devs: Final Bug Fixing & Polish**    | All Devs    | **High** | Nov 14 (Fri) | Pending |
 | **Final Project Submission**               | Jerome      | **High** | Nov 14 (Fri) | Pending |
