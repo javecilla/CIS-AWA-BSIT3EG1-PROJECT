@@ -35,6 +35,7 @@ This project is built using modern web technologies to ensure a responsive, effi
   - **Database:** Firebase Realtime Database to store and manage all application data.
   - **Storage:** Firebase Storage for user profile pictures.
   - **Hosting:** Firebase Hosting for final deployment.
+- **Google ReCAPTCHA:** [reCAPTCHA v2 (Checkbox)](https://www.google.com/recaptcha/admin/create) for client-side anti-bot verification on sensitive forms (like registration and test emails).
 - **Email Service:** [EmailJS](https://www.emailjs.com/) for sending email notifications.
 
 ---
