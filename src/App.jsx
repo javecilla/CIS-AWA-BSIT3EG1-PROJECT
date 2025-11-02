@@ -14,6 +14,7 @@ import StaffDashboard from '@/pages/Staff/Dashboard'
 import TestFirebaseDatabase from '@/pages/TestingDemo/FirbaseDatabase'
 import TestFirebaseStorage from '@/pages/TestingDemo/FirebaseStorage'
 import TestFirebaseAuthentication from '@/pages/TestingDemo/FirebaseAuthentication'
+import SendEmail from '@/pages/TestingDemo/SendEmail'
 function App() {
   return (
     <>
@@ -57,6 +58,7 @@ function App() {
           path="/test-demo/firebase-authentication"
           element={<TestFirebaseAuthentication />}
         />
+        <Route path="/test-demo/send-email" element={<SendEmail />} />
       </Routes>
     </>
   )
