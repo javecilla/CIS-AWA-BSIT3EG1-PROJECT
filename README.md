@@ -61,16 +61,6 @@ This section contains important guides for team members to follow.
 
 ---
 
-## Project Resources
-
-This sections contains our project resources used to aid development and design.
-
-- **[Wireframe Designs](https://excalidraw.com/#room=81adb652c51e26818072,29B5pKuXJoM1Gt1EPqmjnA)**: Link to the Excalidraw file containing low-fidelity wireframe designs.
-- **[Figma High-Fidelity Designs](https://www.figma.com/design/ZY2Ec51xEQIfx4Yuc5eV5I/Animal-bite-center?node-id=51-1137&t=0s8vmax7sh2RP9d6-0)**: Access to the Figma file containing high-fidelity designs and prototypes.
-- **[Teams Documentation](https://drive.google.com/drive/folders/12uM7-GUV4gfsy8Vm_V6-DwOuxgso-3OV?usp=drive_link)**: Google Drive folder containing all project-related documents, including test cases, design files, and meeting notes.
-
----
-
 ## Sprint Development Plan
 
 The development is organized into sprints to ensure timely delivery of features within the project deadline of November 14.
@@ -83,8 +73,8 @@ _Goal: Finalize the design and test cases so developers can start immediately._
 | :----------------------------- | :---------- | :------- | :----------- | :------- |
 | **Wireframe Design**           | Jerome      | **High** | Oct 31 (Fri) | **Done** |
 | **Environment Setup**          | Jerome      | **High** | Oct 31 (Fri) | **Done** |
-| **Figma High-Fidelity Design** | Francis     | **High** | Nov 2 (Sun)  | Pending  |
-| **QA - Test Case Creation**    | Giga        | Medium   | Nov 2 (Sun)  | Pending  |
+| **Figma High-Fidelity Design** | Francis     | **High** | Nov 2 (Sun)  | **Done** |
+| **QA - Test Case Creation**    | Giga        | Medium   | Nov 2 (Sun)  | In Progress  |
 
 ### **Sprint 1: MVP - Core Authentication & Patient Portal (Nov 3 - Nov 8)**
 
@@ -113,3 +103,14 @@ _Goal: Build staff tools, integrate everything, conduct final testing, and submi
 | **QA: Full System Functional Testing**     | Giga        | **High** | Nov 13 (Thu) | Pending |
 | **All Devs: Final Bug Fixing & Polish**    | All Devs    | **High** | Nov 14 (Fri) | Pending |
 | **Final Project Submission**               | Jerome      | **High** | Nov 14 (Fri) | Pending |
+
+---
+
+## Project Resources
+
+This sections contains our project resources used to aid development and design.
+
+- **[Wireframe Designs](https://excalidraw.com/#room=81adb652c51e26818072,29B5pKuXJoM1Gt1EPqmjnA)**: Link to the Excalidraw file containing low-fidelity wireframe designs.
+- **[Figma High-Fidelity Designs](https://www.figma.com/design/ZY2Ec51xEQIfx4Yuc5eV5I/Animal-bite-center?node-id=51-1137&t=0s8vmax7sh2RP9d6-0)**: Access to the Figma file containing high-fidelity designs and prototypes.
+- **[Teams Documentation](https://drive.google.com/drive/folders/12uM7-GUV4gfsy8Vm_V6-DwOuxgso-3OV?usp=drive_link)**: Google Drive folder containing all project-related documents, including test cases, design files, and meeting notes.
+
