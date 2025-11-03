@@ -4,7 +4,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendEmailVerification // 1. Import the function
 } from 'firebase/auth'
 import ReCAPTCHA from 'react-google-recaptcha'
 import './FirebaseAuthentication.css'
@@ -28,7 +29,12 @@ function FirebaseAuthentication() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUser(user)
-        setStatusMessage('User is logged in.')
+        // Update status based on verification
+        if (user.emailVerified) {
+          setStatusMessage('User is logged in and verified.')
+        } else {
+          setStatusMessage('User is logged in, but email is NOT verified.')
+        }
         setIsError(false)
       } else {
         setCurrentUser(null)
@@ -44,7 +50,7 @@ function FirebaseAuthentication() {
     setEmail('')
     setPassword('')
     if (recaptchaRef.current) {
-      recaptchaRef.current.reset() // Resets the reCAPTCHA box
+      recaptchaRef.current.reset()
     }
     setRecaptchaToken(null)
   }
@@ -55,7 +61,6 @@ function FirebaseAuthentication() {
       setIsError(true)
       return false
     }
-
     if (!recaptchaToken) {
       setStatusMessage('Please check the "I\'m not a robot" box.')
       setIsError(true)
@@ -73,18 +78,20 @@ function FirebaseAuthentication() {
     setStatusMessage('Attempting to register...')
 
     try {
-      // NOTE: For full security, you should send the 'recaptchaToken'
-      // to your backend (like a Firebase Function) to verify it
-      // using your VITE_RECAPTCHA_BACKEND_KEY before creating a user.
-      // This code only checks if the *frontend* box was ticked.
-
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       )
-      console.log('FIREBASE REGISTERED USER:', userCredential.user)
-      setStatusMessage('Registration successful! You are now logged in.')
+      const user = userCredential.user
+      console.log('FIREBASE REGISTERED USER:', user)
+
+      // 2. Send the verification email
+      await sendEmailVerification(user)
+
+      setStatusMessage(
+        'Registration successful! Please check your email to verify your account.'
+      )
       resetForm()
     } catch (error) {
       console.error('FIREBASE REGISTER ERROR:', error.message)
@@ -104,19 +111,24 @@ function FirebaseAuthentication() {
     setStatusMessage('Attempting to log in...')
 
     try {
-      // NOTE: See security note in handleRegister
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
         password
       )
       console.log('FIREBASE LOGGED IN USER:', userCredential.user)
-      setStatusMessage('Login successful!')
+
+      // 3. Check verification status on login
+      if (userCredential.user.emailVerified) {
+        setStatusMessage('Login successful!')
+      } else {
+        setStatusMessage('Login successful, but your email is not verified.')
+        setIsError(true) // Use error style to highlight
+      }
     } catch (error) {
       console.error('FIREBASE LOGIN ERROR:', error.message)
       setStatusMessage(`Login Failed: ${error.message}`)
       setIsError(true)
-      // Reset reCAPTCHA on failed login
       if (recaptchaRef.current) {
         recaptchaRef.current.reset()
       }
@@ -127,6 +139,7 @@ function FirebaseAuthentication() {
   }
 
   const handleLogout = async () => {
+    // ... (Your logout code is perfect, no change needed)
     setIsSubmitting(true)
     setStatusMessage('Logging out...')
     try {
@@ -142,7 +155,26 @@ function FirebaseAuthentication() {
     }
   }
 
+  const handleResendVerification = async () => {
+    if (!currentUser) return
+
+    setIsSubmitting(true)
+    setStatusMessage('Sending verification email...')
+    try {
+      await sendEmailVerification(currentUser)
+      setStatusMessage('Verification email sent! Please check your inbox.')
+      setIsError(false)
+    } catch (error) {
+      console.error('RESEND VERIFICATION ERROR:', error.message)
+      setStatusMessage(`Error: ${error.message}`)
+      setIsError(true)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   if (authIsLoading) {
+    // ... (Your loading spinner is perfect)
     return (
       <div className="container my-5 text-center">
         <div className="spinner-border" role="status">
@@ -159,10 +191,22 @@ function FirebaseAuthentication() {
         <div className="col-lg-6">
           <div className="p-4 border rounded-3 shadow-sm bg-light">
             {currentUser ? (
-              // --- LOGGED IN VIEW ---
+              // --- LOGGED IN VIEW (UPDATED) ---
               <div>
                 <h2 className="h4 mb-3">Auth Status: Logged In</h2>
-                <div className="alert alert-success">
+
+                {/* 4. Show Verification Status */}
+                {currentUser.emailVerified ? (
+                  <div className="alert alert-success">
+                    <strong>Status:</strong> Email is Verified
+                  </div>
+                ) : (
+                  <div className="alert alert-warning">
+                    <strong>Status:</strong> Email is NOT Verified
+                  </div>
+                )}
+
+                <div className="mb-3 p-3 bg-white rounded border">
                   <p className="mb-1">
                     <strong>Email:</strong> {currentUser.email}
                   </p>
@@ -170,19 +214,30 @@ function FirebaseAuthentication() {
                     <strong>UID:</strong> {currentUser.uid}
                   </p>
                 </div>
+
+                {/* 5. Add a Resend Button */}
+                {!currentUser.emailVerified && (
+                  <button
+                    className="btn btn-secondary w-100 mb-2"
+                    onClick={handleResendVerification}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Sending...' : 'Resend Verification Email'}
+                  </button>
+                )}
+
                 <button
                   className="btn btn-danger w-100"
                   onClick={handleLogout}
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'Logging out...' : 'Log Out'}
+                  {isSubmitting ? '...' : 'Log Out'}
                 </button>
               </div>
             ) : (
               // --- LOGGED OUT VIEW ---
               <div>
                 <h2 className="h4 mb-4">Test Login - Firebase Auth Check</h2>
-
                 {statusMessage && (
                   <div
                     className={`alert ${
@@ -193,8 +248,10 @@ function FirebaseAuthentication() {
                     {statusMessage}
                   </div>
                 )}
-
-                <form onSubmit={handleLogin}>
+                <form>
+                  {' '}
+                  {/* Removed onSubmit, using button clicks */}
+                  {/* ... (Your email and password inputs are perfect) ... */}
                   <div className="mb-3">
                     <label htmlFor="authEmail" className="form-label small">
                       Email
@@ -223,7 +280,6 @@ function FirebaseAuthentication() {
                       required
                     />
                   </div>
-
                   <div className="mb-3 d-flex justify-content-center">
                     <ReCAPTCHA
                       ref={recaptchaRef}
@@ -232,10 +288,9 @@ function FirebaseAuthentication() {
                       onExpired={() => setRecaptchaToken(null)}
                     />
                   </div>
-
                   <div className="d-grid gap-2">
                     <button
-                      type="submit"
+                      type="button" // Changed to type="button"
                       className="btn btn-primary"
                       onClick={handleLogin}
                       disabled={isSubmitting}
@@ -243,7 +298,7 @@ function FirebaseAuthentication() {
                       {isSubmitting ? '...' : 'Login'}
                     </button>
                     <button
-                      type="button"
+                      type="button" // Changed to type="button"
                       className="btn btn-outline-secondary"
                       onClick={handleRegister}
                       disabled={isSubmitting}
