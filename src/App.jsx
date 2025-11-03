@@ -15,6 +15,8 @@ import TestFirebaseDatabase from '@/pages/TestingDemo/FirbaseDatabase'
 import TestFirebaseStorage from '@/pages/TestingDemo/FirebaseStorage'
 import TestFirebaseAuthentication from '@/pages/TestingDemo/FirebaseAuthentication'
 import SendEmail from '@/pages/TestingDemo/SendEmail'
+import MockRegister from '@/pages/TestingDemo/MockRegisterFlow'
+import MockLogin from '@/pages/TestingDemo/MockLoginFlow'
 function App() {
   return (
     <>
@@ -59,6 +61,8 @@ function App() {
           element={<TestFirebaseAuthentication />}
         />
         <Route path="/test-demo/send-email" element={<SendEmail />} />
+        <Route path="/test-demo/register" element={<MockRegister />} />
+        <Route path="/test-demo/login" element={<MockLogin />} />
       </Routes>
     </>
   )
