@@ -31,3 +31,7 @@ body{
     color: white;
     font-weight: var(--font-weight-medium);
 }
+.btn:hover{
+    background-color: var(--color-primary-light);
+    color: white;
+}

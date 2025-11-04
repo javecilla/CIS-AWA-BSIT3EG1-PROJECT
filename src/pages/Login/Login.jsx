@@ -1,6 +1,7 @@
 import './Login.css'
 import loginImage from '@/assets/login-image.png'
 import logoClinic from '@/assets/logo-clinic.png'
+import { NavLink } from "react-router-dom";
 
 function Login() {
   return (
@@ -39,7 +40,7 @@ function Login() {
 
                 <p className="mt-3 text-center">
                   Don’t have an account?&nbsp;
-                  <a href="#" className="text-primary">register here</a>
+                  <NavLink className="text-primary" to="/register">register here</NavLink>
                 </p>
 
               </div>
