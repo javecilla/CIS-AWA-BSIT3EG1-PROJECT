@@ -31,13 +31,47 @@ function Login() {
   const [verificationStatus, setVerificationStatus] = useState('warning')
   const [countdown, setCountdown] = useState(0)
 
+  const [failedAttempts, setFailedAttempts] = useState(0)
+  const [isLocked, setIsLocked] = useState(false)
+  const [lockoutCountdown, setLockoutCountdown] = useState(0)
+
   const [recaptchaToken, setRecaptchaToken] = useState(null)
   const recaptchaRef = useRef(null)
   const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_FRONTEND_KEY
 
   const COOLDOWN_KEY = 'verification_cooldown_expiry'
+  const LOCKOUT_KEY = 'login_lockout_expiry'
+  const FAILED_ATTEMPTS_KEY = 'failed_login_attempts'
+  const MAX_ATTEMPTS = 3
+  const LOCKOUT_DURATION = 60
 
   const navigate = useNavigate()
+
+  //check for existing login lockout
+  useEffect(() => {
+    const storedLockoutExpiry = localStorage.getItem(LOCKOUT_KEY)
+    const storedFailedAttempts = localStorage.getItem(FAILED_ATTEMPTS_KEY)
+
+    if (storedFailedAttempts) {
+      setFailedAttempts(parseInt(storedFailedAttempts))
+    }
+
+    if (storedLockoutExpiry) {
+      const remainingTime = Math.max(
+        0,
+        Math.floor((parseInt(storedLockoutExpiry) - Date.now()) / 1000)
+      )
+      if (remainingTime > 0) {
+        setIsLocked(true)
+        setLockoutCountdown(remainingTime)
+      } else {
+        localStorage.removeItem(LOCKOUT_KEY)
+        localStorage.removeItem(FAILED_ATTEMPTS_KEY)
+        setFailedAttempts(0)
+        setIsLocked(false)
+      }
+    }
+  }, [])
 
   //check for existing resend verification email cooldown
   useEffect(() => {
@@ -59,7 +93,7 @@ function Login() {
   //auth state listener - handles redirects on verified login
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      //force token refresh to get latest email verification status
+      //force token refresh para ma-get  yung pinaka latest email verification status
       if (user) {
         await user.reload()
       }
@@ -73,6 +107,12 @@ function Login() {
 
           if (snapshot.exists()) {
             const userData = snapshot.val()
+
+            localStorage.removeItem(FAILED_ATTEMPTS_KEY)
+            localStorage.removeItem(LOCKOUT_KEY)
+            setFailedAttempts(0)
+            setIsLocked(false)
+
             if (userData.role === PATIENT) {
               navigate('/p/dashboard')
             } else if (userData.role === STAFF) {
@@ -92,15 +132,15 @@ function Login() {
           await signOut(auth)
         }
       } else if (user && !user.emailVerified) {
-        //if user is authentication pero di verified
+        //yung user is authenticated but not verified
         setCurrentUser(user)
-        setLoginStep('verify') //show verification view
+        setLoginStep('verify')
         setVerificationMessage(
           'Your account is not verified. Please verify it first.'
         )
         setVerificationStatus('warning')
       } else {
-        //user is logged out
+        //if user is logged out
         setCurrentUser(null)
         setLoginStep('login')
       }
@@ -111,7 +151,7 @@ function Login() {
     return () => unsubscribe()
   }, [navigate])
 
-  //resend verifiaction link countdown timer management
+  //resent verification link countdown timer
   useEffect(() => {
     if (countdown > 0) {
       const timer = setInterval(() => {
@@ -129,6 +169,48 @@ function Login() {
       return () => clearInterval(timer)
     }
   }, [countdown])
+
+  //lock countdown timer
+  useEffect(() => {
+    if (lockoutCountdown > 0) {
+      const timer = setInterval(() => {
+        setLockoutCountdown((prevCount) => {
+          const newCount = prevCount - 1
+
+          if (newCount === 0) {
+            setIsLocked(false)
+            setFailedAttempts(0)
+            localStorage.removeItem(LOCKOUT_KEY)
+            localStorage.removeItem(FAILED_ATTEMPTS_KEY)
+            setGeneralError('')
+          }
+
+          return newCount
+        })
+      }, 1000)
+
+      return () => clearInterval(timer)
+    }
+  }, [lockoutCountdown])
+
+  const handleFailedLogin = () => {
+    const newFailedAttempts = failedAttempts + 1
+    setFailedAttempts(newFailedAttempts)
+    localStorage.setItem(FAILED_ATTEMPTS_KEY, newFailedAttempts.toString())
+
+    if (newFailedAttempts >= MAX_ATTEMPTS) {
+      //locked yung account
+      const lockoutExpiry = Date.now() + LOCKOUT_DURATION * 1000
+      localStorage.setItem(LOCKOUT_KEY, lockoutExpiry.toString())
+      setIsLocked(true)
+      setLockoutCountdown(LOCKOUT_DURATION)
+      setGeneralError(
+        `Too many failed login attempts. Please wait ${
+          LOCKOUT_DURATION / 60
+        } minutes before trying again.`
+      )
+    }
+  }
 
   const resetForm = () => {
     setEmail('')
@@ -163,6 +245,16 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault()
     setGeneralError('')
+
+    if (isLocked) {
+      setGeneralError(
+        `Account is locked. Please wait ${Math.ceil(
+          lockoutCountdown / 60
+        )} minute(s) before trying again.`
+      )
+      return
+    }
+
     if (!validateForm()) return
 
     setIsSubmitting(true)
@@ -174,7 +266,10 @@ function Login() {
         password
       )
 
-      //check verification status
+      localStorage.removeItem(FAILED_ATTEMPTS_KEY)
+      localStorage.removeItem(LOCKOUT_KEY)
+      setFailedAttempts(0)
+
       if (!userCredential.user.emailVerified) {
         setLoginStep('verify')
         setVerificationMessage(
@@ -189,12 +284,14 @@ function Login() {
         error.code === 'auth/wrong-password' ||
         error.code === 'auth/user-not-found'
       ) {
-        // setValidationErrors({
-        //   general: 'Invalid email or password! please try again.'
-        // })
-        setValidationErrors({
-          email: 'Invalid email or password! please try again.'
-        })
+        handleFailedLogin()
+
+        const remainingAttempts = MAX_ATTEMPTS - (failedAttempts + 1)
+        if (remainingAttempts > 0) {
+          setValidationErrors({
+            email: `Invalid email or password! Please try again. You have ${remainingAttempts} attempt(s) remaining.`
+          })
+        }
         setPassword('')
       } else {
         setGeneralError(
@@ -235,8 +332,7 @@ function Login() {
       )
       setVerificationStatus('success')
 
-      //store expiry timestamp sa localStorage
-      const expiryTime = Date.now() + 60 * 1000 //60 seconds from now
+      const expiryTime = Date.now() + 60 * 1000
       localStorage.setItem(COOLDOWN_KEY, expiryTime.toString())
       setCountdown(60)
     } catch (error) {
@@ -253,6 +349,12 @@ function Login() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
   if (authIsLoading) {
@@ -305,8 +407,24 @@ function Login() {
               >
                 <p className="text-under fw-medium">Login to your account</p>
 
+                {/* Lockout Warning */}
+                {isLocked && (
+                  <div
+                    className="alert alert-danger d-flex align-items-center"
+                    role="alert"
+                  >
+                    <i className="bi flex-shrink-0 me-2 fa-solid fa-lock"></i>
+                    <div>
+                      Account locked due to multiple failed login attempts.
+                      Please wait{' '}
+                      <strong>{formatTime(lockoutCountdown)}</strong> before
+                      trying again.
+                    </div>
+                  </div>
+                )}
+
                 {/* General Error Alert */}
-                {generalError && (
+                {generalError && !isLocked && (
                   <div
                     className="alert alert-danger d-flex align-items-center"
                     role="alert"
@@ -344,6 +462,7 @@ function Login() {
                         }))
                       }
                     }}
+                    disabled={isLocked}
                   />
                   {validationErrors.email && (
                     <div className="invalid-feedback error-message d-block">
@@ -370,6 +489,7 @@ function Login() {
                         }))
                       }
                     }}
+                    disabled={isLocked}
                   />
                   {validationErrors.password && (
                     <div className="invalid-feedback error-message d-block">
@@ -403,7 +523,7 @@ function Login() {
                 <button
                   type="submit"
                   className="btn w-100 btn-login py-2 mb-2"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isLocked}
                 >
                   {isSubmitting ? (
                     <>
@@ -413,6 +533,11 @@ function Login() {
                         aria-hidden="true"
                       ></span>
                       Logging in...
+                    </>
+                  ) : isLocked ? (
+                    <>
+                      <i className="fa-solid fa-lock me-2"></i>
+                      Login Locked
                     </>
                   ) : (
                     'Login'
@@ -481,7 +606,7 @@ function Login() {
                     setIsSubmitting(true)
                     if (currentUser) {
                       await currentUser.reload()
-                      // Force auth state check
+                      //force auth state check tapos reload page kung verified na
                       if (currentUser.emailVerified) {
                         window.location.reload()
                       } else {
