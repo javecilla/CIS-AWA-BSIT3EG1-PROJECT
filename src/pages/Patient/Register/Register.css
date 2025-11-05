@@ -12,7 +12,7 @@
 }
 
 .title-text {
-    color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .step-circle.active {
@@ -27,29 +27,56 @@
 .text-description {
   font-size: 0.75rem;
 }
-.form-check-input{
-    border: 2px solid var(--color-primary);
-    background-color: var(--color-accent-light);
+.form-check-input {
+  border: 2px solid var(--color-primary);
+  background-color: var(--color-accent-light);
 }
-.access-btn{
-    width: 80%;
+.access-btn {
+  width: 80%;
 }
-.text-under{
-    font-size: 12px;
-    color: black;
+.text-under {
+  font-size: 12px;
+  color: black;
 }
-.text-middle{
-    font-size: 15px;
+.text-middle {
+  font-size: 15px;
 }
-.id-number{
-    font-size: 24px;
-    color:var(--color-primary)
+.id-number {
+  font-size: 24px;
+  color: var(--color-primary);
 }
-.previous-button{
-    border: 2px solid var(--color-primary);
-    background-color: var(--color-accent);
-    color: var(--color-primary);
+.btn-next,
+.btn-submit {
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: var(--font-weight-medium);
 }
-.invalid-feedback{
-    font-size: 12px;
+.btn-next:hover,
+.btn-submit:hover {
+  background-color: var(--color-primary-light);
+  color: white;
+}
+.btn-previous {
+  border: 2px solid var(--color-primary);
+  background-color: transparent !important;
+  color: var(--color-primary) !important;
+}
+.btn-previous:hover {
+  color: var(--bs-primary);
+  border: 2px solid var(--bs-primary);
+}
+
+.invalid-feedback {
+  font-size: 12px;
+}
+
+.error-message {
+  margin-bottom: 20px;
+}
+
+.error-message.recaptcha {
+  margin-top: -20px;
+  font-size: 14px;
+  color: var(--bs-form-invalid-color);
+  text-align: center;
 }
