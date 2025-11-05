@@ -24,43 +24,12 @@ import SendEmail from '@/pages/TestingDemo/SendEmail'
 import MockRegister from '@/pages/TestingDemo/MockRegisterFlow'
 import MockLogin from '@/pages/TestingDemo/MockLoginFlow'
 
+import { useUser } from '@/context/UserContext'
+
 function ProtectedRoute({ children, allowedRoles }) {
-  const [authState, setAuthState] = useState({
-    loading: true,
-    user: null,
-    role: null
-  })
+  const { loading, user, role } = useUser()
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user && user.emailVerified) {
-        try {
-          const userRef = child(ref(db), 'users/' + user.uid)
-          const snapshot = await get(userRef)
-
-          if (snapshot.exists()) {
-            const userData = snapshot.val()
-            setAuthState({
-              loading: false,
-              user: user,
-              role: userData.role
-            })
-          } else {
-            setAuthState({ loading: false, user: null, role: null })
-          }
-        } catch (error) {
-          console.error('Failed to fetch user data:', error)
-          setAuthState({ loading: false, user: null, role: null })
-        }
-      } else {
-        setAuthState({ loading: false, user: null, role: null })
-      }
-    })
-
-    return () => unsubscribe()
-  }, [])
-
-  if (authState.loading) {
+  if (loading) {
     return (
       <div className="container py-5 d-flex align-items-center min-vh-100 justify-content-center">
         <div
@@ -74,16 +43,16 @@ function ProtectedRoute({ children, allowedRoles }) {
     )
   }
 
-  //no authenticated
-  if (!authState.user) {
+  // Not authenticated
+  if (!user) {
     return <Navigate to="/login" replace />
   }
 
-  //role-based access control
-  if (allowedRoles && !allowedRoles.includes(authState.role)) {
-    if (authState.role === PATIENT) {
+  // Role-based access control
+  if (allowedRoles && !allowedRoles.includes(role)) {
+    if (role === PATIENT) {
       return <Navigate to="/p/dashboard" replace />
-    } else if (authState.role === STAFF) {
+    } else if (role === STAFF) {
       return <Navigate to="/s/dashboard" replace />
     }
     return <Navigate to="/login" replace />

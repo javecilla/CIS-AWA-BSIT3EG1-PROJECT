@@ -1,161 +1,58 @@
-import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { signOut, onAuthStateChanged } from 'firebase/auth'
-import { ref, get, child } from 'firebase/database'
-import { auth, db } from '@/libs/firebase.js'
-import { PATIENT, STAFF } from '@/constants/user-roles'
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { signOut } from 'firebase/auth'
+import { auth } from '@/libs/firebase.js'
 import './Navbar.css'
 
 function Navbar() {
-  const [userRole, setUserRole] = useState(null)
-  const [userName, setUserName] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
   const navigate = useNavigate()
 
-  const formatFullName = (nameObj) => {
-    if (!nameObj) return ''
-
-    const { firstName, middleName, lastName, suffix } = nameObj
-    const parts = [firstName, middleName, lastName, suffix].filter(Boolean)
-    return parts.join(' ')
-  }
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user && user.emailVerified) {
-        try {
-          const userRef = child(ref(db), `users/${user.uid}`)
-          const snapshot = await get(userRef)
-
-          if (snapshot.exists()) {
-            const userData = snapshot.val()
-            setUserRole(userData.role)
-            setUserName(formatFullName(userData.fullName) || user.email)
-          }
-        } catch (error) {
-          console.error('Error fetching user role:', error)
-        }
-      } else {
-        setUserRole(null)
-        setUserName('')
-      }
-      setIsLoading(false)
-    })
-
-    return () => unsubscribe()
-  }, [])
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const handleLogout = async () => {
+    setIsLoggingOut(true)
     try {
       await signOut(auth)
-      setUserRole(null)
-      setUserName('')
       navigate('/login')
     } catch (error) {
       console.error('Logout failed:', error)
+    } finally {
+      setIsLoggingOut(false)
     }
   }
 
-  if (isLoading) {
-    return (
-      <nav>
-        <div className="text-center py-3">
-          <span className="spinner-border spinner-border-sm" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </span>
-        </div>
-      </nav>
-    )
-  }
-
-  //if no user is logged in, show yung general nav link
-  if (!userRole) {
-    return (
-      <nav>
-        <ul>
-          <li>
-            <Link to="/login">Login</Link>
-          </li>
-          <li>
-            <Link to="/register">Register</Link>
-          </li>
-        </ul>
-      </nav>
-    )
-  }
-
   return (
-    <nav>
-      <ul>
-        {/* User Info Section */}
-        {userName && (
-          <li className="nav-user-info">
-            <strong>Welcome, {userName}</strong>
-            <br />
-            <small className="text-muted">
-              Role: <span className="badge bg-secondary">{userRole}</span>
-            </small>
-          </li>
-        )}
+    <nav className="navbar position-sticky d-flex justify-content-between align-items-center">
+      <div className="navbar-left d-flex align-items-center">
+        <div className="logo-container d-flex align-items-center">
+          <img src="/assets/images/logo.png" alt="Main Logo" />
+          <div className="text-logo d-flex flex-column">
+            <h3 className="m-0">Animal Bite</h3>
+            <h3 className="m-0">CENTER</h3>
+          </div>
+        </div>
+      </div>
 
-        {/* Patient Links - Only show if user is a patient */}
-        {userRole === PATIENT && (
-          <>
-            <h6 className="mt-3">Patient Menu</h6>
-            <li>
-              <Link to="/p/dashboard">
-                {/* <i className="fa-solid fa-gauge me-2"></i> */}
-                Dashboard
-              </Link>
-            </li>
-            <li>
-              <Link to="/p/my-profile">
-                {/* <i className="fa-solid fa-user me-2"></i> */}
-                My Profile
-              </Link>
-            </li>
-            <li>
-              <Link to="/p/make-appointment">
-                {/* <i className="fa-solid fa-calendar-plus me-2"></i> */}
-                Make Appointment
-              </Link>
-            </li>
-          </>
-        )}
-
-        {/* Staff Links - Only show if user is staff */}
-        {userRole === STAFF && (
-          <>
-            <h6 className="mt-3">Staff Menu</h6>
-            <li>
-              <Link to="/s/dashboard">
-                {/* <i className="fa-solid fa-gauge me-2"></i> */}
-                Dashboard
-              </Link>
-            </li>
-            <li>
-              <Link to="/s/patient/profile">
-                {/* <i className="fa-solid fa-user-injured me-2"></i> */}
-                View Patient Profile
-              </Link>
-            </li>
-            <li>
-              <Link to="/s/patient/register">
-                {/* <i className="fa-solid fa-user-plus me-2"></i> */}
-                Register Patient
-              </Link>
-            </li>
-          </>
-        )}
-
-        {/* Logout Button - Show for all logged-in users */}
-        <li className="mt-3">
-          <button onClick={handleLogout} className="btn btn-danger w-100">
-            <i className="fa-solid fa-right-from-bracket me-2"></i>
-            Logout
-          </button>
-        </li>
-      </ul>
+      <div className="navbar-right">
+        <button
+          className="btn btn-primary custom-logout-btn"
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+        >
+          {isLoggingOut ? (
+            <>
+              <span
+                className="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Logging out...
+            </>
+          ) : (
+            'Logout'
+          )}
+        </button>
+      </div>
     </nav>
   )
 }

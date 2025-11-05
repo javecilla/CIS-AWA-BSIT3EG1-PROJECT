@@ -1,0 +1,18 @@
+.breadcrumb li.breadcrumb-item {
+  font-size: 2rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  margin: 0;
+  line-height: 1.2;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: 0.3s all ease;
+}
+li.breadcrumb-item.active {
+  opacity: 0.8;
+  text-decoration: none;
+}
+li.breadcrumb-item.active:hover {
+  text-decoration: underline;
+  opacity: 0.9;
+}

@@ -1,17 +1,14 @@
-import './Dashboard.css';
-import Header from '../../../components/Header/Header';
-import ProfileCard from '../../../components/ProfileCard/ProfileCard';
-import AppointmentHistory from '../../../components/AppointmentHistory/AppointmentHistory';
-import ConsultationImage from '@/assets/images/consultation.png';
-import SampleProfile from '@/assets/images/sample-profile.jpg';
+import './Dashboard.css'
+import Header from '@/components/Header'
+import ProfileCard from '@/components/ProfileCard'
+import AppointmentHistory from '@/components/AppointmentHistory'
+import ConsultationImage from '@/assets/images/consultation.png'
+import SampleProfile from '@/assets/images/sample-profile.jpg'
 
 function Dashboard() {
- 
   return (
     <>
-      <Header
-        name = "User"
-      />
+      <Header />
 
       <div className="dashboard-container">
         <div className="main-content-width">
@@ -20,11 +17,11 @@ function Dashboard() {
             <div className="col-12 col-lg-6 d-flex">
               <div className="card-equal w-100">
                 <ProfileCard
-                  image = {SampleProfile}
-                  name = "User Name"
-                  patientId = "PAN-10001"
-                  mobileNumber = "09991118888"
-                  email = "user@gmail.ocm"
+                  image={SampleProfile}
+                  name="User Name"
+                  patientId="PAN-10001"
+                  mobileNumber="09991118888"
+                  email="user@gmail.ocm"
                 />
               </div>
             </div>
@@ -44,7 +41,8 @@ function Dashboard() {
                     Ready for your <span>CONSULTATION?</span>
                   </h2>
                   <p className="consultation-description mb-3">
-                    Provide your incident details to book your first anti-rabies vaccination appointment.
+                    Provide your incident details to book your first anti-rabies
+                    vaccination appointment.
                   </p>
                   <button className="btn btn-primary custom-btn align-self-center align-self-md-start">
                     Make an Appointment
@@ -55,15 +53,12 @@ function Dashboard() {
           </div>
 
           <div className="appointment-container mt-4">
-            <AppointmentHistory
-              totalRecords = "0"
-              displayedRecords= "0"
-            />
+            <AppointmentHistory totalRecords="0" displayedRecords="0" />
           </div>
         </div>
       </div>
     </>
-  );
+  )
 }
 
-export default Dashboard;
+export default Dashboard
