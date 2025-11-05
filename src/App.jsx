@@ -1,4 +1,10 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { onAuthStateChanged } from 'firebase/auth'
+import { ref, get, child } from 'firebase/database'
+import { auth, db } from '@/libs/firebase.js'
+import { PATIENT, STAFF } from '@/constants/user-roles'
+
 import Navbar from '@/components/Navbar'
 import Login from '@/pages/Login'
 import Register from '@/pages/Patient/Register'
@@ -17,37 +23,162 @@ import TestFirebaseAuthentication from '@/pages/TestingDemo/FirebaseAuthenticati
 import SendEmail from '@/pages/TestingDemo/SendEmail'
 import MockRegister from '@/pages/TestingDemo/MockRegisterFlow'
 import MockLogin from '@/pages/TestingDemo/MockLoginFlow'
+
+function ProtectedRoute({ children, allowedRoles }) {
+  const [authState, setAuthState] = useState({
+    loading: true,
+    user: null,
+    role: null
+  })
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user && user.emailVerified) {
+        try {
+          const userRef = child(ref(db), 'users/' + user.uid)
+          const snapshot = await get(userRef)
+
+          if (snapshot.exists()) {
+            const userData = snapshot.val()
+            setAuthState({
+              loading: false,
+              user: user,
+              role: userData.role
+            })
+          } else {
+            setAuthState({ loading: false, user: null, role: null })
+          }
+        } catch (error) {
+          console.error('Failed to fetch user data:', error)
+          setAuthState({ loading: false, user: null, role: null })
+        }
+      } else {
+        setAuthState({ loading: false, user: null, role: null })
+      }
+    })
+
+    return () => unsubscribe()
+  }, [])
+
+  if (authState.loading) {
+    return (
+      <div className="container py-5 d-flex align-items-center min-vh-100 justify-content-center">
+        <div
+          className="spinner-border"
+          role="status"
+          style={{ width: '3rem', height: '3rem' }}
+        >
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    )
+  }
+
+  //no authenticated
+  if (!authState.user) {
+    return <Navigate to="/login" replace />
+  }
+
+  //role-based access control
+  if (allowedRoles && !allowedRoles.includes(authState.role)) {
+    if (authState.role === PATIENT) {
+      return <Navigate to="/p/dashboard" replace />
+    } else if (authState.role === STAFF) {
+      return <Navigate to="/s/dashboard" replace />
+    }
+    return <Navigate to="/login" replace />
+  }
+
+  return children
+}
+
 function App() {
+  const location = useLocation()
+
+  // Hide navbar for login and register pages
+  const hideNavbar = ['/login', '/register'].includes(location.pathname)
+
   return (
     <>
-      <Navbar />
+      {!hideNavbar && <Navbar />}
 
       <Routes>
-        {/* PRIVATE ROUTES (currently not secured para mabilis mag design)*/}
-
-        {/* PATIENT ROUTES RELATED */}
-        <Route path="/p/onboarding/verify-email" element={<VerifyEmail />} />
-        <Route path="/p/onboarding/set-password" element={<SetPassword />} />
-
-        <Route path="/p/dashboard" element={<PatientDashboard />} />
-        <Route path="/p/my-profile" element={<PatientProfile />} />
-        <Route
-          path="/p/make-appointment"
-          element={<PatientMakeAppointment />}
-        />
-
-        {/* STAFF ROUTES RELATED */}
-        <Route path="/s/dashboard" element={<StaffDashboard />} />
-        <Route path="/s/patient/profile" element={<StaffPatients />} />
-        <Route path="/s/patient/register" element={<StaffAppointments />} />
-
         {/* PUBLIC ROUTES */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
+        {/* PATIENT PROTECTED ROUTES */}
+        <Route
+          path="/p/onboarding/verify-email"
+          element={
+            <ProtectedRoute allowedRoles={[PATIENT]}>
+              <VerifyEmail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/p/onboarding/set-password"
+          element={
+            <ProtectedRoute allowedRoles={[PATIENT]}>
+              <SetPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/p/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={[PATIENT]}>
+              <PatientDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/p/my-profile"
+          element={
+            <ProtectedRoute allowedRoles={[PATIENT]}>
+              <PatientProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/p/make-appointment"
+          element={
+            <ProtectedRoute allowedRoles={[PATIENT]}>
+              <PatientMakeAppointment />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* STAFF PROTECTED ROUTES */}
+        <Route
+          path="/s/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={[STAFF]}>
+              <StaffDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/s/patient/profile"
+          element={
+            <ProtectedRoute allowedRoles={[STAFF]}>
+              <StaffPatients />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/s/patient/register"
+          element={
+            <ProtectedRoute allowedRoles={[STAFF]}>
+              <StaffAppointments />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/login" replace />} />
 
-        {/* TEST ROUTES */}
+        {/* TEST ROUTES (Optional: Remove in production) */}
         <Route
           path="/test-demo/firebase-database"
           element={<TestFirebaseDatabase />}
