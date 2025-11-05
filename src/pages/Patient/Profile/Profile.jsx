@@ -1,12 +1,16 @@
+import Header from '@/components/Header'
 import './Profile.css'
 
 function Profile() {
   return (
-    <div>
-      <h1>
-        patient profile page for logged in patient/client after successful login
-      </h1>
-    </div>
+    <>
+      <Header />
+
+      <div>
+        <h2>Patient Profile Page</h2>
+        <p>Content dito…</p>
+      </div>
+    </>
   )
 }
 

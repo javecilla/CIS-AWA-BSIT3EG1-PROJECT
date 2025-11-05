@@ -1,10 +1,16 @@
+import Header from '@/components/Header'
 import './MakeAppointment.css'
 
 function MakeAppointment() {
   return (
-    <div>
-      <h1>patient make appointment page for logged in patient/client </h1>
-    </div>
+    <>
+      <Header />
+
+      <div>
+        <h2>Patient Make Appointment Page</h2>
+        <p>Content dito…</p>
+      </div>
+    </>
   )
 }
 
