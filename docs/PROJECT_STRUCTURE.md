@@ -10,6 +10,7 @@ Animal Bite Center (CIS) /
 │   ├── services/       # API services
 │   ├── libs/           # Third-party libraries
 │   ├── constants/      # Static data
+│   ├── context/        # React context providers
 │   ├── App.jsx         # Root component
 │   ├── index.css       # Base stylesheets
 │   └── main.jsx        # Entry point
@@ -28,6 +29,7 @@ Animal Bite Center (CIS) /
 - **services/**: API integration and business logic
 - **libs/**: Third-party libraries configurations
 - **constants/**: Static data or variables.
+- **context/**: React context providers for state management
 
 ### `/public` Directory
 
