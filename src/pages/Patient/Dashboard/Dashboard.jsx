@@ -1,209 +1,69 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { onAuthStateChanged, signOut } from 'firebase/auth'
-import { ref, get, child } from 'firebase/database'
-import { auth, db } from '@/libs/firebase.js'
-import { PATIENT } from '@/constants/user-roles'
-import './Dashboard.css'
+import './Dashboard.css';
+import Header from '../../../components/Header/Header';
+import ProfileCard from '../../../components/ProfileCard/ProfileCard';
+import AppointmentHistory from '../../../components/AppointmentHistory/AppointmentHistory';
+import ConsultationImage from '@/assets/images/consultation.png';
+import SampleProfile from '@/assets/images/sample-profile.jpg';
 
 function Dashboard() {
-  const [userData, setUserData] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
-  const navigate = useNavigate()
-
-  const formatFullName = (nameObj) => {
-    if (!nameObj) return 'N/A'
-
-    const { firstName, middleName, lastName, suffix } = nameObj
-    const parts = [firstName, middleName, lastName, suffix].filter(Boolean)
-    return parts.join(' ')
-  }
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        //no user logged in, redirect to login
-        navigate('/login')
-        return
-      }
-
-      if (!user.emailVerified) {
-        //user not verified, redirect to login
-        await signOut(auth)
-        navigate('/login')
-        return
-      }
-
-      try {
-        const userRef = child(ref(db), `users/${user.uid}`)
-        const snapshot = await get(userRef)
-
-        if (snapshot.exists()) {
-          const data = snapshot.val()
-
-          if (data.role !== PATIENT) {
-            setError('Unauthorized access. You are not a patient.')
-            await signOut(auth)
-            navigate('/login')
-            return
-          }
-
-          setUserData({
-            uid: user.uid,
-            email: user.email,
-            emailVerified: user.emailVerified,
-            ...data
-          })
-        } else {
-          setError('User profile not found in database.')
-          await signOut(auth)
-          navigate('/login')
-        }
-      } catch (err) {
-        console.error('Error fetching user data:', err)
-        setError('Failed to load user data. Please try again.')
-      } finally {
-        setIsLoading(false)
-      }
-    })
-
-    return () => unsubscribe()
-  }, [navigate])
-
-  if (isLoading) {
-    return (
-      <div className="container py-5 d-flex align-items-center min-vh-100 justify-content-center">
-        <div
-          className="spinner-border"
-          role="status"
-          style={{ width: '3rem', height: '3rem' }}
-        >
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="container py-5">
-        <div className="alert alert-danger" role="alert">
-          <i className="bi fa-solid fa-triangle-exclamation me-2"></i>
-          {error}
-        </div>
-      </div>
-    )
-  }
-
+ 
   return (
-    <div className="container py-5">
-      <div className="row">
-        <div className="col-12">
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1>
-              TEST Patient Dashboard - Welcome,{' '}
-              {formatFullName(userData.fullName)}!
-            </h1>
-          </div>
+    <>
+      <Header
+        name = "User"
+      />
 
-          {userData && (
-            <div className="card">
-              <div className="card-body">
-                <h6 className="card-subtitle mb-3 text-muted">
-                  Your Account Information
-                </h6>
+      <div className="dashboard-container">
+        <div className="main-content-width">
+          <div className="row gx-4 gy-4 align-items-stretch profile-consult-row">
+            {/*profile card*/}
+            <div className="col-12 col-lg-6 d-flex">
+              <div className="card-equal w-100">
+                <ProfileCard
+                  image = {SampleProfile}
+                  name = "User Name"
+                  patientId = "PAN-10001"
+                  mobileNumber = "09991118888"
+                  email = "user@gmail.ocm"
+                />
+              </div>
+            </div>
+            {/*consultation card*/}
+            <div className="col-12 col-lg-6 d-flex">
+              <div className="card-equal consultation-card w-100 d-flex flex-column flex-md-row align-items-center gap-3">
+                <div className="flex-shrink-0 d-flex justify-content-center">
+                  <img
+                    src={ConsultationImage}
+                    alt="Doctor at desk"
+                    className="img-fluid rounded consultation-image"
+                  />
+                </div>
 
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <p className="mb-1">
-                      <strong>User ID:</strong>
-                    </p>
-                    <p className="text-muted">{userData.uid}</p>
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <p className="mb-1">
-                      <strong>Email:</strong>
-                    </p>
-                    <p className="text-muted">{userData.email}</p>
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <p className="mb-1">
-                      <strong>Full Name:</strong>
-                    </p>
-                    <p className="text-muted">
-                      {formatFullName(userData.fullName)}
-                    </p>
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <p className="mb-1">
-                      <strong>Birthday:</strong>
-                    </p>
-                    <p className="text-muted">{userData.birthday || 'N/A'}</p>
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <p className="mb-1">
-                      <strong>Role:</strong>
-                    </p>
-                    <p className="text-muted">
-                      <span className="badge bg-success">{userData.role}</span>
-                    </p>
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <p className="mb-1">
-                      <strong>Account Created:</strong>
-                    </p>
-                    <p className="text-muted">
-                      {userData.createdAt
-                        ? new Date(userData.createdAt).toLocaleString()
-                        : 'N/A'}
-                    </p>
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <p className="mb-1">
-                      <strong>Email Verified:</strong>
-                    </p>
-                    <p className="text-muted">
-                      {userData.emailVerified ? (
-                        <span className="badge bg-success">
-                          <i className="fa-solid fa-circle-check me-1"></i>
-                          Verified
-                        </span>
-                      ) : (
-                        <span className="badge bg-warning">
-                          <i className="fa-solid fa-circle-exclamation me-1"></i>
-                          Not Verified
-                        </span>
-                      )}
-                    </p>
-                  </div>
+                <div className="consultation-text d-flex flex-column justify-content-center align-items-center align-items-md-start">
+                  <h2 className="consultation-title">
+                    Ready for your <span>CONSULTATION?</span>
+                  </h2>
+                  <p className="consultation-description mb-3">
+                    Provide your incident details to book your first anti-rabies vaccination appointment.
+                  </p>
+                  <button className="btn btn-primary custom-btn align-self-center align-self-md-start">
+                    Make an Appointment
+                  </button>
                 </div>
               </div>
             </div>
-          )}
+          </div>
 
-          <div className="mt-4">
-            <div className="alert alert-info" role="alert">
-              <h5 className="alert-heading">
-                <i className="fa-solid fa-info-circle me-2"></i>
-                Patient Portal
-              </h5>
-              <p className="mb-0">
-                Welcome to your patient dashboard. Here you can view your
-                appointments, medical records, and more.
-              </p>
-            </div>
+          <div className="appointment-container mt-4">
+            <AppointmentHistory
+              totalRecords = "0"
+              displayedRecords= "0"
+            />
           </div>
         </div>
       </div>
-    </div>
-  )
+    </>
+  );
 }
 
-export default Dashboard
+export default Dashboard;
