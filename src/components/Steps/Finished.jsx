@@ -1,5 +1,5 @@
-import registerImage from '@/assets/register-step3-image.png'
-import logoClinic from '@/assets/logo-clinic.png'
+import registerImage from '@/assets/images/register-step3-image.png'
+import logoClinic from '@/assets/images/logo-clinic.png'
 
 export default function Finished(handleRedirect) {
   return (

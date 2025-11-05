@@ -35,3 +35,6 @@ body{
     background-color: var(--color-primary-light);
     color: white;
 }
+.invalid-feedback{
+    font-size: 12px;
+}
