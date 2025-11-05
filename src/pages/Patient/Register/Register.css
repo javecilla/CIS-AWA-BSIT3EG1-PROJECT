@@ -50,3 +50,6 @@
     background-color: var(--color-accent);
     color: var(--color-primary);
 }
+.invalid-feedback{
+    font-size: 12px;
+}

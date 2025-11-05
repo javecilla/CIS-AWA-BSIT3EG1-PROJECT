@@ -1,7 +1,8 @@
-import registerImage from '@/assets/register-step2-image.png'
-import logoClinic from '@/assets/logo-clinic.png'
+import registerImage from '@/assets/images/register-step2-image.png'
+import logoClinic from '@/assets/images/logo-clinic.png'
 
-export default function personalInfoStep({ formData, handleChange, nextStep, prevStep}) {
+export default function personalInfoStep({ formData, handleChange, nextStep, prevStep, showErrors}) {
+  const nameRegex = /^[A-Za-zÑñáéíóúÁÉÍÓÚ\s\-'.]+$/;
     return (
       <div className="row align-items-start">
 
@@ -48,46 +49,145 @@ export default function personalInfoStep({ formData, handleChange, nextStep, pre
 
               <div className="row g-3">
 
-                <div className="col-md-12">
+                <div className={`col-md-12 ${showErrors &&(!formData.mobileNumber || !/^(09|\+639)\d{9}$/.test(formData.mobileNumber))? "my-0": ""}`}>
                   <label className="fw-medium">Mobile Number:</label>
                   <small className="text-muted d-block mb-1 text-description">
                     Used for sending critical SMS reminders. Please ensure it is correct and active.
                   </small>
-                  <input type="text" className="form-control mt-1" name="mobileNumber" placeholder="e.g., 09*******22" value={formData.mobileNumber} onChange={handleChange}/>
+                  <input type="text" className={`form-control mt-1 ${showErrors && (!formData.mobileNumber || !/^(09|\+639)\d{9}$/.test(formData.mobileNumber))? "is-invalid": ""}`} name="mobileNumber" placeholder="e.g., 09*******22" value={formData.mobileNumber} onChange={handleChange}/>
+                  {showErrors && !formData.mobileNumber && (<div className="invalid-feedback d-block">Mobile number is required.</div>)}
+                  {showErrors && formData.mobileNumber && !/^(09|\+639)\d{9}$/.test(formData.mobileNumber) && (<div className="invalid-feedback d-block">Invalid PH mobile number format.</div>)}
                 </div>
 
-                <div className="col-md-12">
+                <div className={`col-md-12 ${showErrors &&(!formData.emailAddress || !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.emailAddress))? "my-0": ""}`}>
                   <label className="fw-medium">Email Address:</label>
                   <small className="text-muted d-block mb-1 text-description">
                     Digital copies of receipts and medical records will be sent here and serve as your username in portal.
                   </small>
-                  <input type="email" className="form-control mt-1" name="emailAddress" placeholder="e.g., john.doe@example.net" value={formData.emailAddress} onChange={handleChange}/>
+                  <input type="email" className={`form-control mt-1 ${showErrors && (!formData.emailAddress || !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.emailAddress))? "is-invalid": ""}`} name="emailAddress" placeholder="e.g., john.doe@example.net" value={formData.emailAddress} onChange={handleChange}/>
+                  {showErrors && !formData.emailAddress && (<div className="invalid-feedback d-block">Email address is required.</div>)}
+                  {showErrors && formData.emailAddress && !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.emailAddress) && (<div className="invalid-feedback d-block">Invalid email format.</div>)}
                 </div>
 
-                <div className="col-md-12">
+                <div className={`col-md-12 ${
+                  showErrors &&
+                  (!formData.emergencyContactName || !nameRegex.test(formData.emergencyContactName))
+                    ? "my-0"
+                    : ""
+                }`}>
                   <label className="fw-medium">Emergency Contact Name:</label>
                   <small className="text-muted d-block mb-1 text-description">
                     Who should we call in an emergency?
                   </small>
-                  <input type="email" className="form-control mt-1" name="emergencyContactName" placeholder="e.g., Jane Smith" value={formData.emergencyContactName} onChange={handleChange}/>
+
+                  <input
+                    type="text"
+                    className={`form-control mt-1 ${
+                      showErrors &&
+                      (!formData.emergencyContactName || !nameRegex.test(formData.emergencyContactName))
+                        ? "is-invalid"
+                        : ""
+                    }`}
+                    name="emergencyContactName"
+                    placeholder="e.g., Jane Smith"
+                    value={formData.emergencyContactName}
+                    onChange={handleChange}
+                  />
+
+                  {showErrors && !formData.emergencyContactName && (
+                    <div className="invalid-feedback d-block">
+                      Emergency contact name is required.
+                    </div>
+                  )}
+
+                  {showErrors && formData.emergencyContactName && !nameRegex.test(formData.emergencyContactName) && (
+                    <div className="invalid-feedback d-block">
+                      Name must not contain numbers.
+                    </div>
+                  )}
                 </div>
 
-                <div className="col-md-6">
+                <div className={`col-md-6 ${
+                  showErrors &&
+                  (
+                    !formData.emergencyContactRelationship ||
+                    !nameRegex.test(formData.emergencyContactRelationship) ||
+                    !formData.emergencyContactNumber ||
+                    !/^(09|\+639)\d{9}$/.test(formData.emergencyContactNumber)
+                  )
+                    ? "my-0"
+                    : ""
+                }`}>
                   <label className="fw-medium">Relationship to Patient:</label>
                   <small className="text-muted d-block mb-1 text-description">
                     What is their relationship to the patient?
                   </small>
-                  <input type="text" className="form-control mt-1" name="emergencyContactRelationship" placeholder="e.g., Spouse, Mother, Sibling" value={formData.emergencyContactRelationship} onChange={handleChange}/>
+
+                  <input
+                    type="text"
+                    className={`form-control mt-1 ${
+                      showErrors &&
+                      (!formData.emergencyContactRelationship || !nameRegex.test(formData.emergencyContactRelationship))
+                        ? "is-invalid"
+                        : ""
+                    }`}
+                    name="emergencyContactRelationship"
+                    placeholder="e.g., Spouse, Mother, Sibling"
+                    value={formData.emergencyContactRelationship}
+                    onChange={handleChange}
+                  />
+
+                  {showErrors && !formData.emergencyContactRelationship && (
+                    <div className="invalid-feedback d-block">This field is required.</div>
+                  )}
+
+                  {showErrors && formData.emergencyContactRelationship && !nameRegex.test(formData.emergencyContactRelationship) && (
+                    <div className="invalid-feedback d-block">
+                      Relationship must not contain numbers.
+                    </div>
+                  )}
                 </div>
 
-                <div className="col-md-6">
+                <div className={`col-md-6 ${
+                  showErrors &&
+                  (
+                    !formData.emergencyContactRelationship ||
+                    !nameRegex.test(formData.emergencyContactRelationship) ||
+                    !formData.emergencyContactNumber ||
+                    !/^(09|\+639)\d{9}$/.test(formData.emergencyContactNumber)
+                  )
+                    ? "my-0"
+                    : ""
+                }`}>
                   <label className="fw-medium">Emergency Contact's Mobile Number:</label>
                   <small className="text-muted d-block mb-1 text-description">
-                    Enter the mobile number of the emergency contact.
+                    Enter mobile number of emergency contact.
                   </small>
-                  <input type="text" className="form-control mt-1" name="emergencyContactNumber" placeholder="e.g., 09*******88" value={formData.emergencyContactNumber} onChange={handleChange}/>
+
+                  <input
+                    type="text"
+                    className={`form-control mt-1 ${
+                      showErrors &&
+                      (!formData.emergencyContactNumber || !/^(09|\+639)\d{9}$/.test(formData.emergencyContactNumber))
+                        ? "is-invalid"
+                        : ""
+                    }`}
+                    name="emergencyContactNumber"
+                    placeholder="e.g., 09*******88"
+                    value={formData.emergencyContactNumber}
+                    onChange={handleChange}
+                  />
+
+                  {showErrors && !formData.emergencyContactNumber && (
+                    <div className="invalid-feedback d-block">Mobile number is required.</div>
+                  )}
+
+                  {showErrors && formData.emergencyContactNumber && !/^(09|\+639)\d{9}$/.test(formData.emergencyContactNumber) && (
+                    <div className="invalid-feedback d-block">Invalid PH mobile number format.</div>
+                  )}
                 </div>
-                <div className="col-md-12 mt-3 mx-1">
+
+                <div className="col-md-12 mt-1 mx-1">
                   <h6 className="fw-bold mb-2 fs-5 title-text">REVIEW & CONSENT</h6>
                   <p className="fw-medium mb-2 text-description fs-6">Data Privacy and Communication Consent</p>
                   <p className="mb-3 text-description">
@@ -95,7 +195,7 @@ export default function personalInfoStep({ formData, handleChange, nextStep, pre
                   </p>
                   <div className="form-check">
                     <input
-                      className="form-check-input"
+                      className={`form-check-input ${showErrors && !formData.hasReviewed ? "is-invalid" : ""}`}
                       type="checkbox"
                       name="hasReviewed"
                       checked={formData.hasReviewed}
@@ -106,7 +206,7 @@ export default function personalInfoStep({ formData, handleChange, nextStep, pre
 
                   <div className="form-check">
                     <input
-                      className="form-check-input"
+                      className={`form-check-input ${showErrors && !formData.hasConsent ? "is-invalid" : ""}`}
                       type="checkbox"
                       name="hasConsent"
                       checked={formData.hasConsent}
@@ -117,7 +217,7 @@ export default function personalInfoStep({ formData, handleChange, nextStep, pre
 
                   <div className="form-check">
                     <input
-                      className="form-check-input"
+                      className={`form-check-input ${showErrors && !formData.hasAgreed ? "is-invalid" : ""}`}
                       type="checkbox"
                       name="hasAgreed"
                       checked={formData.hasAgreed}
