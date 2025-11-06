@@ -1,6 +1,6 @@
 import './Header.css'
 import BreadCrumb from '@/components/BreadCrumb'
-import { useUser } from '@/context/UserContext'
+import { useUser } from '@/contexts/UserContext'
 
 function Header() {
   const { userData, loading } = useUser()

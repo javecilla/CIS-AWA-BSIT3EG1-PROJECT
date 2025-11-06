@@ -24,7 +24,7 @@ import SendEmail from '@/pages/TestingDemo/SendEmail'
 import MockRegister from '@/pages/TestingDemo/MockRegisterFlow'
 import MockLogin from '@/pages/TestingDemo/MockLoginFlow'
 
-import { useUser } from '@/context/UserContext'
+import { useUser } from '@/contexts/UserContext'
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { loading, user, role } = useUser()

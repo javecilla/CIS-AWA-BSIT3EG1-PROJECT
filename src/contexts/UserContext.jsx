@@ -2,6 +2,7 @@ import { createContext, useState, useContext, useEffect } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { ref, get, child } from 'firebase/database'
 import { auth, db } from '@/libs/firebase'
+import { formatFullName } from '@/utils/formatter'
 
 const UserContext = createContext()
 
@@ -11,11 +12,36 @@ export function UserProvider({ children }) {
   const [user, setUser] = useState(null)
   const [role, setRole] = useState(null)
 
-  const formatFullName = (nameObj) => {
-    if (!nameObj) return ''
-    const { firstName, middleName, lastName, suffix } = nameObj
-    const parts = [firstName, middleName, lastName, suffix].filter(Boolean)
-    return parts.join(' ')
+  const refreshUserData = async () => {
+    const firebaseUser = auth.currentUser
+    if (firebaseUser && firebaseUser.emailVerified) {
+      try {
+        const userRef = child(ref(db), `users/${firebaseUser.uid}`)
+        const snapshot = await get(userRef)
+
+        if (snapshot.exists()) {
+          const data = snapshot.val()
+          setUserData({
+            ...data,
+            formattedName: formatFullName(data.fullName) || firebaseUser.email,
+            uid: firebaseUser.uid
+          })
+          setRole(data.role)
+        } else {
+          //handle case where user exists in Auth but not RTDB
+          setUserData(null)
+          setRole(null)
+        }
+      } catch (error) {
+        console.error('Error refreshing user data:', error)
+        setUserData(null)
+        setRole(null)
+      }
+    } else {
+      //no user or not verified
+      setUserData(null)
+      setRole(null)
+    }
   }
 
   useEffect(() => {
@@ -31,7 +57,9 @@ export function UserProvider({ children }) {
             const data = snapshot.val()
             setUserData({
               ...data,
-              formattedName: formatFullName(data.fullName) || firebaseUser.email
+              formattedName:
+                formatFullName(data.fullName) || firebaseUser.email,
+              uid: firebaseUser.uid
             })
             setRole(data.role)
           } else {
@@ -54,7 +82,9 @@ export function UserProvider({ children }) {
   }, [])
 
   return (
-    <UserContext.Provider value={{ userData, loading, user, role }}>
+    <UserContext.Provider
+      value={{ userData, loading, user, role, refreshUserData }}
+    >
       {children}
     </UserContext.Provider>
   )

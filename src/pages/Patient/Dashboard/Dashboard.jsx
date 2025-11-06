@@ -3,9 +3,16 @@ import Header from '@/components/Header'
 import ProfileCard from '@/components/ProfileCard'
 import AppointmentHistory from '@/components/AppointmentHistory'
 import ConsultationImage from '@/assets/images/consultation.png'
-import SampleProfile from '@/assets/images/sample-profile.jpg'
+import DefaultProfile from '@/assets/images/default-profile.png'
+import { useUser } from '@/contexts/UserContext'
 
 function Dashboard() {
+  const { userData, loading } = useUser()
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
   return (
     <>
       <Header />
@@ -16,13 +23,7 @@ function Dashboard() {
             {/*profile card*/}
             <div className="col-12 col-lg-6 d-flex">
               <div className="card-equal w-100">
-                <ProfileCard
-                  image={SampleProfile}
-                  name="User Name"
-                  patientId="PAN-10001"
-                  mobileNumber="09991118888"
-                  email="user@gmail.ocm"
-                />
+                <ProfileCard patientData={userData} />
               </div>
             </div>
             {/*consultation card*/}

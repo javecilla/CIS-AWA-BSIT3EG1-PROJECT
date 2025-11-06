@@ -16,7 +16,7 @@ export default function BreadCrumb() {
   const ignoredSegments = ['p']
   segments = segments.filter((seg) => !ignoredSegments.includes(seg))
 
-  console.log('Breadcrumb segments:', segments)
+  // console.log('Breadcrumb segments:', segments)
 
   return (
     <nav className="breadcrumb" aria-label="breadcrumb">

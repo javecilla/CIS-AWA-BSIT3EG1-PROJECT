@@ -1,1 +1,1 @@
-export { default } from './ProfileInformation.jsx'
+export { default } from './PersonalInformation.jsx'
