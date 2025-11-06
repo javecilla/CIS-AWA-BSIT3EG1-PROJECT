@@ -1,4 +1,5 @@
 import './ProfileCard.css';
+import { NavLink } from 'react-router-dom'
 
 function ProfileCard({image, name, patientId, mobileNumber, email}) {
   return (
@@ -11,16 +12,14 @@ function ProfileCard({image, name, patientId, mobileNumber, email}) {
             {/*left section*/}
             <div className="left-section d-flex flex-column align-items-center align-items-md-start">
                 <div className="profile-container">
-                    <img
-                        src={image}
-                        alt="Profile"
-                        className="img-fluid rounded profile-image"
-                    />
+                    <img src={image} alt="Profile" className="img-fluid rounded profile-image"/>
                 </div>
 
                 <div className="left-button-wrap mt-auto w-100 d-flex d-md-block justify-content-center justify-content-md-start">
                     <button className="btn btn-primary custom-btn">
-                        My Account
+                        <NavLink to="/p/my-profile" className="text-white text-decoration-none">      
+                            My Account
+                        </NavLink>
                     </button>
                 </div>
             </div>
@@ -36,7 +35,9 @@ function ProfileCard({image, name, patientId, mobileNumber, email}) {
 
                 <div className="right-button-wrap w-100 d-flex d-md-block justify-content-center justify-content-md-start">
                     <button className="btn btn-primary custom-btn">
-                    View my full profile
+                        <NavLink to="/p/my-profile" className="text-white text-decoration-none">      
+                            View my full Profile
+                        </NavLink>
                     </button>
                 </div>
             </div>

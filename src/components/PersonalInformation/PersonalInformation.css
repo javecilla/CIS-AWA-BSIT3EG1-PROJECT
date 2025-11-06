@@ -1,0 +1,82 @@
+.personal-info-card {
+  padding: 25px;
+  box-sizing: border-box;
+  height: 100%;
+}
+
+.section-title {
+  color: var(--color-primary);
+  font-size: 16px;
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 15px 0;
+  letter-spacing: 0.5px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-label {
+  display: block;
+  color: var(--color-primary);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.form-control {
+  width: 100%;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 14px;
+  box-sizing: border-box;
+  background-color: white;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.age-label {
+  width: 30%;
+  border: 1px solid white;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 14px;
+  box-sizing: border-box;
+  background-color: white;
+  color: black;
+  font-size: 14px;
+  white-space: nowrap;
+  min-width: 60px;
+}
+
+@media (max-width: 992px) {
+  .personal-info-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .personal-info-card {
+    padding: 15px;
+  }
+
+  .section-title {
+    font-size: 14px;
+  }
+
+  .form-label {
+    font-size: 13px;
+  }
+
+  .form-control {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .age-label {
+    font-size: 13px;
+  }
+}
