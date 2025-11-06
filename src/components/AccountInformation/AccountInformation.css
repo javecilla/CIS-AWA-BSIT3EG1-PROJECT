@@ -13,8 +13,8 @@
 }
 
 .profile-image-wrapper {
-  width: 140px;
-  height: 140px;
+  width: 340px;
+  height: 340px;
   background-color: white;
   border-radius: 10px;
   display: flex;
@@ -79,12 +79,12 @@
   margin-bottom: 5px;
 }
 
-.form-note {
+/* .form-note {
   color: #666;
   font-size: 12px;
   margin: 0 0 5px 0;
   font-style: italic;
-}
+} */
 
 .form-control {
   width: 100%;
@@ -142,4 +142,10 @@
     font-size: 13px;
     padding: 8px 10px;
   }
+}
+.ai-email-group input:read-only {
+  /* bootstrap design like for readonly field */
+  background-color: #e9ecef;
+  opacity: 1;
+  pointer-events: none !important;
 }
