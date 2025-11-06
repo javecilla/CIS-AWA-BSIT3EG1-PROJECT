@@ -89,7 +89,7 @@ _Goal: Build the end-to-end patient experience. This is the highest priority to 
 | :------------------------------------------- | :---------- | :------- | :---------- | :------ |
 | **FE: Login & Registration Pages**           | Mico        | **High** | Nov 4 (Tue) | **Done** |
 | **BE: Firebase Auth & User DB**              | Jerome      | **High** | Nov 5 (Wed) | **Done** |
-| **QA: Test Authentication Flow**             | Giga        | Medium   | Nov 6 (Thu) | Pending |
+| **QA: Test Authentication Flow**             | Giga        | Medium   | Nov 6 (Thu) | **Done** |
 | **FE: Patient Dashboard & Appointment Form** | Rensen      | **High** | Nov 7 (Fri) | Pending |
 | **BE: Save & Fetch Appointment Data**        | Jerome      | **High** | Nov 8 (Sat) | Pending |
 | **QA: Test Patient Appointment Flow**        | Giga        | Medium   | Nov 8 (Sat) | Pending |
