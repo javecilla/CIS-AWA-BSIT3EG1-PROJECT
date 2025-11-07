@@ -157,6 +157,10 @@ function AccountInformation({ accountData }) {
         uppercase: false,
         number: false
       })
+
+      setTimeout(() => {
+        setSuccessMessage('')
+      }, 5000)
     } catch (error) {
       console.error('Password update error:', error)
 
