@@ -2,7 +2,7 @@ import './Profile.css'
 import Header from '@/components/Header'
 import AccountInformation from '@/components/AccountInformation'
 import PersonalInformation from '@/components/PersonalInformation'
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { useUser } from '@/contexts/UserContext'
 import UserImageProfile from '@/components/UserImageProfile'
 
@@ -33,7 +33,7 @@ function Profile() {
     <>
       <Header />
 
-      <div className="my-profile-container">
+      <div className="container my-profile-container">
         <div className="my-profile-content-wrapper">
           {/*PROFILE TOP SECTION*/}
           <div className="my-profile-top-section">
@@ -43,11 +43,12 @@ function Profile() {
                 Use this module to view or update your profile
               </p>
             </div>
-            <button className="btn btn-primary my-profile-back-btn">
-              <Link to="/p/dashboard" className="my-profile-back-link">
-                Back to Dashboard
-              </Link>
-            </button>
+            <NavLink
+              to="/p/dashboard"
+              className="btn btn-primary my-profile-back-btn"
+            >
+              Back to Dashboard
+            </NavLink>
           </div>
 
           <div className="row g-4">

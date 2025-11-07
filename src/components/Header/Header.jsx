@@ -12,7 +12,7 @@ function Header() {
 
   return (
     <header className="welcome-section">
-      <div className="welcome-top-section d-flex flex-row justify-content-between">
+      <div className="header-container container welcome-top-section d-flex flex-row justify-content-between">
         <BreadCrumb />
         <h3>
           Welcome Back,{' '}

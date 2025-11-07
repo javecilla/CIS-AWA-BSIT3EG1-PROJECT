@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import DefaultProfile from '@/assets/images/default-profile.png'
 import { formatFullName, maskEmail, maskPhoneNumber } from '@/utils/formatter'
 import './ProfileCard.css'
@@ -26,14 +26,12 @@ function ProfileCard({ patientData }) {
           </div>
 
           <div className="left-button-wrap mt-auto w-100 d-flex d-md-block justify-content-center justify-content-md-start">
-            <button className="btn btn-primary custom-btn">
-              <Link
-                to="/p/my-profile"
-                className="text-white text-decoration-none"
-              >
-                My Account
-              </Link>
-            </button>
+            <NavLink
+              to="/p/my-profile"
+              className="text-white text-decoration-none btn btn-primary custom-btn"
+            >
+              My Account
+            </NavLink>
           </div>
         </div>
 
@@ -56,12 +54,12 @@ function ProfileCard({ patientData }) {
 
           <div className="right-button-wrap w-100 d-flex d-md-block justify-content-center justify-content-md-start">
             <button className="btn btn-primary custom-btn">
-              <Link
+              <NavLink
                 to="/p/my-profile"
                 className="text-white text-decoration-none"
               >
                 View my full Profile
-              </Link>
+              </NavLink>
             </button>
           </div>
         </div>
