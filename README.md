@@ -92,8 +92,8 @@ _Goal: Build the end-to-end patient experience. This is the highest priority to 
 | **QA: Test Authentication Flow**             | Giga        | Medium   | Nov 5 (Wed) | **Done** |
 | **FE: Patient Dashboard & View Profile**     | Rensen      | **High** | Nov 6 (Thu) | **Done** |
 | **BE: Fetch Profile & Update Patient Data**  | Jerome      | **High** | Nov 7 (Fri) | **Done** |
-| **FE: Patient Book Appointment Form**        | Rensen      | **High** | Nov 8 (Fri) | **Done** |
-| **BE: Save and Fetch Patient Appointments**   | Jerome      | **High** | Nov 9 (Sat) | **Done** |
+| **FE: Patient Book Appointment Form**        | Rensen      | **High** | Nov 8 (Sat) | **Done** |
+| **BE: Save and Fetch Patient Appointments**   | Jerome      | **High** | Nov 9 (Sun) | **Done** |
 | **QA: Test Patient Appointment Flow**        | Giga        | Medium   | Nov 9 (Sat) | In Progress |
 
 ### **Sprint 2: Staff Portal & Final Features (Nov 9 - Nov 14)**
