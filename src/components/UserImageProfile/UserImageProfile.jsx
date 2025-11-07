@@ -172,6 +172,10 @@ function UserImageProfile({ userData }) {
       setPreviewImage(null)
       setImageLoadError(false)
 
+      setTimeout(() => {
+        setSuccessMessage('')
+      }, 5000)
+
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
@@ -265,7 +269,18 @@ function UserImageProfile({ userData }) {
               className="btn btn-primary save-file-btn"
               disabled={isUploading}
             >
-              {isUploading ? 'Saving...' : 'Save'}
+              {isUploading ? (
+                <>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                  Saving...
+                </>
+              ) : (
+                'Save'
+              )}
             </button>
           )}
 
