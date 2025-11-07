@@ -1,0 +1,10 @@
+.btn-remove {
+  background-color: transparent;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 5px;
+  color: var(--color-primary);
+}
+.btn-remove:hover {
+  border: 1.5px solid var(--color-primary-light);
+  color: var(--color-primary-light);
+}

@@ -4,6 +4,7 @@ import AccountInformation from '@/components/AccountInformation'
 import PersonalInformation from '@/components/PersonalInformation'
 import { Link } from 'react-router-dom'
 import { useUser } from '@/contexts/UserContext'
+import UserImageProfile from '@/components/UserImageProfile'
 
 function Profile() {
   const { userData, loading } = useUser()
@@ -52,7 +53,11 @@ function Profile() {
           <div className="row g-4">
             {/* ACCOUNT INFORMATION*/}
             <div className="col-12 col-lg-5">
-              <AccountInformation accountData={userData} />
+              <div className="account-info-card">
+                <UserImageProfile userData={userData} />
+                <br />
+                <AccountInformation accountData={userData} />
+              </div>
             </div>
 
             {/*PROFILE INFORMATION*/}
