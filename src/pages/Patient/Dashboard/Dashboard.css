@@ -70,9 +70,14 @@ body {
   margin: 0;
 }
 
+.dashboard-to-appointment-btn {
+  text-decoration: none;
+  color: white;
+}
+
 .custom-btn {
   background-color: var(--color-primary);
-  color: #fff;
+  color: white;
   border: none;
   border-radius: 6px;
   padding: 8px 14px;
