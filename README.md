@@ -87,12 +87,14 @@ _Goal: Build the end-to-end patient experience. This is the highest priority to 
 
 | Task                                         | Assigned To | Priority | Due Date    | Remarks |
 | :------------------------------------------- | :---------- | :------- | :---------- | :------ |
-| **FE: Login & Registration Pages**           | Mico        | **High** | Nov 4 (Tue) | **Done** |
-| **BE: Firebase Auth & User DB**              | Jerome      | **High** | Nov 5 (Wed) | **Done** |
-| **QA: Test Authentication Flow**             | Giga        | Medium   | Nov 6 (Thu) | **Done** |
-| **FE: Patient Dashboard & Appointment Form** | Rensen      | **High** | Nov 7 (Fri) | In Progress |
-| **BE: Save & Fetch Appointment Data**        | Jerome      | **High** | Nov 8 (Sat) | In Progress |
-| **QA: Test Patient Appointment Flow**        | Giga        | Medium   | Nov 8 (Sat) | Pending |
+| **FE: Login & Registration Pages**           | Mico        | **High** | Nov 3 (Mon) | **Done** |
+| **BE: Firebase Auth & User DB**              | Jerome      | **High** | Nov 4 (Tue) | **Done** |
+| **QA: Test Authentication Flow**             | Giga        | Medium   | Nov 5 (Wed) | **Done** |
+| **FE: Patient Dashboard & View Profile**     | Rensen      | **High** | Nov 6 (Thu) | **Done** |
+| **BE: Fetch Profile & Update Patient Data**  | Jerome      | **High** | Nov 7 (Fri) | **Done** |
+| **FE: Patient Book Appointment Form**        | Rensen      | **High** | Nov 8 (Fri) | In Progress |
+| **BE: Save and Fetch Patient Appointments**   | Jerome      | **High** | Nov 9 (Sat) | In Progress |
+| **QA: Test Patient Appointment Flow**        | Giga        | Medium   | Nov 9 (Sat) | Pending |
 
 ### **Sprint 2: Staff Portal & Final Features (Nov 9 - Nov 14)**
 
@@ -100,11 +102,11 @@ _Goal: Build staff tools, integrate everything, conduct final testing, and submi
 
 | Task                                       | Assigned To | Priority | Due Date     | Remarks |
 | :----------------------------------------- | :---------- | :------- | :----------- | :------ |
-| **FE: Staff Dashboard (Appointment List)** | Mico        | **High** | Nov 10 (Mon) | Pending |
-| **BE: Fetch Appointments for Staff View**  | Jerome      | **High** | Nov 10 (Mon) | Pending |
+| **FE: Staff Dashboard & Patient Profile**  | Rensen        | **High** | Nov 10 (Mon) | Pending |
+| **BE: Fetch Appointments & Update Patient Data**  | Jerome      | **High** | Nov 10 (Mon) | Pending |
 | **FE: Walk-in Patient Registration Form**  | Mico        | Medium   | Nov 11 (Tue) | Pending |
 | **BE: Staff-side Patient Registration**    | Jerome      | Medium   | Nov 11 (Tue) | Pending |
-| **BE: Firebase Storage for Profile Pics**  | Jerome      | Low      | Nov 12 (Wed) | Pending |
+| **BE: Cleaning and Polishing Code**        | Jerome      | Medium   | Nov 12 (Wed) | Pending |
 | **QA: Full System Functional Testing**     | Giga        | **High** | Nov 13 (Thu) | Pending |
 | **All Devs: Final Bug Fixing & Polish**    | All Devs    | **High** | Nov 14 (Fri) | Pending |
 | **Final Project Submission**               | Jerome      | **High** | Nov 14 (Fri) | Pending |
