@@ -5,7 +5,10 @@
   justify-content: space-between;
   align-items: center;
 }
-
+.nav-container {
+  background: transparent !important;
+  max-width: 80vw !important;
+}
 .navbar-left {
   display: flex;
   align-items: center;

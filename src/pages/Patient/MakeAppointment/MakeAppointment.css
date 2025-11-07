@@ -1,13 +1,28 @@
 /*CONTAINER STYLES*/
+/* .appointment-parent-container {
+  margin-top: -130px;
+} */
+.select-reason {
+  margin-top: -270px;
+}
+.appointment-form {
+  margin-top: -65px;
+}
+.appointment-confirmation {
+  margin-top: -180px;
+}
+.followup-form {
+  margin-top: -65px;
+}
+.followup-confirmation {
+  margin-top: -180px;
+}
 
 .appointment-container {
   background-color: var(--color-accent);
   border: 0.5px solid var(--color-primary);
   border-radius: 10px;
   padding: 30px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  max-width: 91.5vw;
 }
 
 /*SHARED STYLES*/
@@ -60,16 +75,6 @@
 .form-select:focus,
 .form-control:focus {
   outline: none;
-  border-color: var(--color-primary);
-}
-
-.form-check-input {
-  cursor: pointer;
-  border: 2px solid var(--color-primary);
-}
-
-.form-check-input:checked {
-  background-color: var(--color-primary);
   border-color: var(--color-primary);
 }
 
@@ -248,4 +253,23 @@
   .confirmation-title {
     font-size: 1.3rem;
   }
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+}
+.btn-primary:hover {
+  color: white;
+}
+.btn-outline-primary {
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+  background-color: transparent;
+}
+.btn-outline-primary:hover {
+  border: 2px solid var(--color-primary-light);
+  color: var(--color-primary-light);
+  background-color: transparent;
 }

@@ -72,3 +72,92 @@ body {
   margin: 0;
   padding: 0;
 }
+
+input[type='checkbox'],
+input[type='radio'] {
+  cursor: pointer;
+  border: 2px solid var(--color-primary);
+}
+
+input[type='checkbox']:checked,
+input[type='radio']:checked {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/*  Override Bootstrap default styles */
+.form-select,
+.form-control {
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 14px;
+  background-color: white;
+}
+
+.form-select:focus,
+.form-control:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+}
+.btn-primary:disabled {
+  background-color: var(--color-primary);
+  color: #e0e0e0;
+}
+.btn-primary:focus {
+  background-color: var(--color-primary-light);
+  color: #e0e0e0;
+}
+.btn-primary:hover {
+  color: white;
+}
+
+.btn-outline-primary {
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+  background-color: transparent;
+}
+.btn-outline-primary:disabled {
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  background-color: transparent;
+}
+.btn-outline-primary:focus {
+  border: 2px solid var(--color-primary-light);
+  color: var(--color-primary-light);
+  background-color: transparent;
+}
+.btn-outline-primary:hover {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.btn-outline-secondary {
+  border: 1.5px solid var(--color-primary-light);
+  color: var(--color-primary-light);
+  background-color: transparent;
+}
+.btn-outline-secondary:disabled {
+  border: 1px solid var(--color-primary-light);
+  color: var(--color-primary-light);
+  background-color: transparent;
+}
+.btn-outline-secondary:focus {
+  border: 1.5px solid var(--color-primary-light);
+  color: var(--color-primary-light);
+  background-color: transparent;
+}
+.btn-outline-secondary:hover {
+  background-color: transparent;
+  border: 1.5px solid var(--color-primary-light);
+  color: var(--color-primary-light);
+  opacity: 0.8;
+}
+.text-description {
+  font-size: 0.75rem;
+}

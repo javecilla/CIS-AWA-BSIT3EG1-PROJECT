@@ -1,16 +1,17 @@
-body {
+.container {
   font-family: var(--font-secondary);
   background-color: var(--color-accent-light);
   color: var(--color-primary);
+  max-width: 78vw;
 }
 
 .dashboard-container {
-  max-width: 91.5vw;
+  max-width: 92vw;
   margin: 0 auto;
 }
 
 .main-content-width {
-  max-width: 91.5vw;
+  max-width: 92vw;
   margin: 0 auto;
   padding-left: 12px;
   padding-right: 12px;

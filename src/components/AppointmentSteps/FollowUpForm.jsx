@@ -1,15 +1,24 @@
-import { NavLink } from "react-router-dom";
+import { NavLink } from 'react-router-dom'
 
-export default function FollowUpForm({ formData, handleChange, nextStep, prevStep, errors }) {
+export default function FollowUpForm({
+  formData,
+  handleChange,
+  nextStep,
+  prevStep,
+  errors,
+  generalError,
+  isSubmitting
+}) {
   return (
-    <div className="appointment-container">
+    <div className="followup-form appointment-container">
       <div className="row align-items-start">
         <div className="col-lg-12 px-4">
-
           <div className="d-flex justify-content-between align-items-start mb-4">
             <div>
               <h5 className="fw-semibold mb-1">Make an Appointment</h5>
-              <p className="text-muted small mb-0">Use this module to submit an appointment</p>
+              <p className="text-muted small mb-0">
+                Use this module to submit an appointment
+              </p>
             </div>
             <NavLink to="/dashboard" className="btn btn-primary px-4 py-2">
               Back to Dashboard
@@ -19,7 +28,11 @@ export default function FollowUpForm({ formData, handleChange, nextStep, prevSte
           <div className="d-flex justify-content-center align-items-center mb-5 gap-2">
             <div className="text-center">
               <div className="step-circle completed">1</div>
-              <p className="small fw-medium mt-2">Select<br />Reason for Visit</p>
+              <p className="small fw-medium mt-2">
+                Select
+                <br />
+                Reason for Visit
+              </p>
             </div>
 
             <div className="flex-grow-0 mx-3 border-top border-2 step-line" />
@@ -40,6 +53,17 @@ export default function FollowUpForm({ formData, handleChange, nextStep, prevSte
           {/*BOOKING DETAILS*/}
           <h6 className="fw-bold mb-3">BOOKING DETAILS</h6>
 
+          {/* General Error Alert */}
+          {generalError && (
+            <div
+              className="alert alert-danger d-flex align-items-center mb-4"
+              role="alert"
+            >
+              <i className="fa-solid fa-triangle-exclamation bi flex-shrink-0 me-2"></i>
+              <div>{generalError}</div>
+            </div>
+          )}
+
           {/*Select a Branch*/}
           <div className="mb-4">
             <label className="fw-medium">Select a Branch:</label>
@@ -48,16 +72,21 @@ export default function FollowUpForm({ formData, handleChange, nextStep, prevSte
             </small>
             <select
               name="branch"
-              className={`form-select mt-1 ${errors.branch ? "is-invalid" : ""}`}
+              className={`form-select mt-1 ${
+                errors.branch ? 'is-invalid' : ''
+              }`}
               value={formData.branch}
               onChange={handleChange}
+              disabled={isSubmitting}
             >
               <option value="">Select</option>
               <option value="Pandi">Pandi</option>
               <option value="Sta. Maria">Sta. Maria</option>
               <option value="Malolos">Malolos</option>
             </select>
-            {errors.branch && <div className="invalid-feedback d-block">{errors.branch}</div>}
+            {errors.branch && (
+              <div className="invalid-feedback d-block">{errors.branch}</div>
+            )}
           </div>
 
           {/*Preferred Appointment Date and Time*/}
@@ -65,17 +94,22 @@ export default function FollowUpForm({ formData, handleChange, nextStep, prevSte
             <div className="col-md-6">
               <label className="fw-medium">Preferred Appointment Date:</label>
               <small className="text-muted d-block mb-1 text-description">
-                Select a date for your consultation. This will be your Day 0 vaccination.
+                Select a date for your consultation.
               </small>
               <input
                 type="date"
                 name="appointmentDate"
-                className={`form-control mt-1 ${errors.appointmentDate ? "is-invalid" : ""}`}
+                className={`form-control mt-1 ${
+                  errors.appointmentDate ? 'is-invalid' : ''
+                }`}
                 value={formData.appointmentDate}
                 onChange={handleChange}
+                disabled={isSubmitting}
               />
               {errors.appointmentDate && (
-                <div className="invalid-feedback d-block">{errors.appointmentDate}</div>
+                <div className="invalid-feedback d-block">
+                  {errors.appointmentDate}
+                </div>
               )}
             </div>
             <div className="col-md-6">
@@ -83,15 +117,30 @@ export default function FollowUpForm({ formData, handleChange, nextStep, prevSte
               <small className="text-muted d-block mb-1 text-description">
                 Select an available time. Slots are based on clinic hours.
               </small>
-              <input
-                type="time"
+              <select
                 name="timeSlot"
-                className={`form-control mt-1 ${errors.timeSlot ? "is-invalid" : ""}`}
+                className={`form-select mt-1 ${
+                  errors.timeSlot ? 'is-invalid' : ''
+                }`}
                 value={formData.timeSlot}
                 onChange={handleChange}
-              />
+                disabled={isSubmitting}
+              >
+                <option value="">Select</option>
+                <option value="7:00 AM - 8:00 AM">7:00 AM - 8:00 AM</option>
+                <option value="8:00 AM - 9:00 AM">8:00 AM - 9:00 AM</option>
+                <option value="9:00 AM - 10:00 AM">9:00 AM - 10:00 AM</option>
+                <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
+                <option value="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</option>
+                <option value="1:00 PM - 2:00 PM">1:00 PM - 2:00 PM</option>
+                <option value="2:00 PM - 3:00 PM">2:00 PM - 3:00 PM</option>
+                <option value="3:00 PM - 4:00 PM">3:00 PM - 4:00 PM</option>
+                <option value="4:00 PM - 5:00 PM">4:00 PM - 5:00 PM</option>
+              </select>
               {errors.timeSlot && (
-                <div className="invalid-feedback d-block">{errors.timeSlot}</div>
+                <div className="invalid-feedback d-block">
+                  {errors.timeSlot}
+                </div>
               )}
             </div>
           </div>
@@ -107,14 +156,19 @@ export default function FollowUpForm({ formData, handleChange, nextStep, prevSte
             </small>
             <textarea
               name="primaryReason"
-              className={`form-control mt-1 ${errors.primaryReason ? "is-invalid" : ""}`}
+              className={`form-control mt-1 ${
+                errors.primaryReason ? 'is-invalid' : ''
+              }`}
               rows="3"
               placeholder="e.g., Follow-up for my Day 7 shot, Wound check-up, General health concern"
               value={formData.primaryReason}
               onChange={handleChange}
+              disabled={isSubmitting}
             ></textarea>
             {errors.primaryReason && (
-              <div className="invalid-feedback d-block">{errors.primaryReason}</div>
+              <div className="invalid-feedback d-block">
+                {errors.primaryReason}
+              </div>
             )}
           </div>
 
@@ -122,37 +176,51 @@ export default function FollowUpForm({ formData, handleChange, nextStep, prevSte
 
           {/*New Allergies or Medical Conditions*/}
           <div className="mb-4">
-            <label className="fw-medium">Any new allergies or medical conditions since your last visit?</label>
+            <label className="fw-medium">
+              Any new allergies or medical conditions since your last visit?
+            </label>
             <small className="text-muted d-block mb-1 text-description">
-              It's important to let us know of any changes to your health. If none, enter "None".
+              It's important to let us know of any changes to your health. If
+              none, enter "None".
             </small>
             <textarea
               name="newConditions"
-              className={`form-control mt-1 ${errors.newConditions ? "is-invalid" : ""}`}
+              className={`form-control mt-1 ${
+                errors.newConditions ? 'is-invalid' : ''
+              }`}
               rows="3"
               placeholder="List any new allergies or medical conditions (or enter 'None')."
               value={formData.newConditions}
               onChange={handleChange}
+              disabled={isSubmitting}
             ></textarea>
             {errors.newConditions && (
-              <div className="invalid-feedback d-block">{errors.newConditions}</div>
+              <div className="invalid-feedback d-block">
+                {errors.newConditions}
+              </div>
             )}
           </div>
 
           {/*Confirmation Checkbox*/}
           <div className="form-check mb-4">
             <input
-              className={`form-check-input ${errors.confirmPolicy ? "is-invalid" : ""}`}
+              className={`form-check-input ${
+                errors.confirmPolicy ? 'is-invalid' : ''
+              }`}
               type="checkbox"
               name="confirmPolicy"
               checked={!!formData.confirmPolicy}
               onChange={handleChange}
+              disabled={isSubmitting}
             />
             <label className="form-check-label">
-              I confirm the details above and agree to the clinic's appointment policy.
+              I confirm the details above and agree to the clinic's appointment
+              policy.
             </label>
             {errors.confirmPolicy && (
-              <div className="invalid-feedback d-block">{errors.confirmPolicy}</div>
+              <div className="invalid-feedback d-block">
+                {errors.confirmPolicy}
+              </div>
             )}
           </div>
 
@@ -162,20 +230,32 @@ export default function FollowUpForm({ formData, handleChange, nextStep, prevSte
               type="button"
               className="btn btn-outline-primary px-5 py-2"
               onClick={prevStep}
+              disabled={isSubmitting}
             >
               Back
             </button>
             <button
               type="button"
-              className="btn btn-primary px-5 py-2 fs-5"
+              className="btn btn-primary px-5 py-2"
               onClick={nextStep}
+              disabled={isSubmitting}
             >
-              Next
+              {isSubmitting ? (
+                <>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                  Submitting...
+                </>
+              ) : (
+                'Submit'
+              )}
             </button>
           </div>
-
         </div>
       </div>
     </div>
-  );
+  )
 }
