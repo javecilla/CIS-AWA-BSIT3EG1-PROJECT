@@ -6,7 +6,6 @@ import {
 } from 'firebase/auth'
 import { auth } from '@/libs/firebase'
 import { useUser } from '@/contexts/UserContext'
-import DefaultProfile from '@/assets/images/default-profile.png'
 import './AccountInformation.css'
 
 function AccountInformation({ accountData }) {
@@ -21,10 +20,8 @@ function AccountInformation({ accountData }) {
     confirmPassword: ''
   })
 
-  // Refs for scrolling to fields
   const currentPasswordRef = useRef(null)
 
-  // Password requirements state
   const [passwordRequirements, setPasswordRequirements] = useState({
     minLength: false,
     specialChar: false,
@@ -36,16 +33,13 @@ function AccountInformation({ accountData }) {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
 
-    // Clear validation error for this field
     if (validationErrors[name]) {
       setValidationErrors((prev) => ({ ...prev, [name]: null }))
     }
 
-    // Clear general messages when user starts typing
     if (generalError) setGeneralError('')
     if (successMessage) setSuccessMessage('')
 
-    // Check password requirements in real-time
     if (name === 'newPassword') {
       setPasswordRequirements({
         minLength: value.length >= 8,
@@ -59,12 +53,10 @@ function AccountInformation({ accountData }) {
   const validateForm = () => {
     const errors = {}
 
-    // Validate current password
     if (!formData.currentPassword.trim()) {
       errors.currentPassword = 'Current password is required.'
     }
 
-    // Validate new password
     if (!formData.newPassword.trim()) {
       errors.newPassword = 'New password is required.'
     } else {
@@ -80,7 +72,6 @@ function AccountInformation({ accountData }) {
       }
     }
 
-    // Validate confirm password
     if (!formData.confirmPassword.trim()) {
       errors.confirmPassword = 'Please confirm your new password.'
     } else if (formData.newPassword !== formData.confirmPassword) {
@@ -94,11 +85,9 @@ function AccountInformation({ accountData }) {
   const handleUpdate = async (e) => {
     e.preventDefault()
 
-    // Clear previous messages
     setGeneralError('')
     setSuccessMessage('')
 
-    // Validate form
     if (!validateForm()) {
       return
     }
@@ -114,7 +103,6 @@ function AccountInformation({ accountData }) {
         return
       }
 
-      // Step 1: Reauthenticate user with current password
       const credential = EmailAuthProvider.credential(
         user.email,
         formData.currentPassword
@@ -137,7 +125,6 @@ function AccountInformation({ accountData }) {
             'Unable to verify your current password. Please try again.'
           )
 
-          // Scroll to current password field
           setTimeout(() => {
             currentPasswordRef.current?.scrollIntoView({
               behavior: 'smooth',
@@ -154,13 +141,10 @@ function AccountInformation({ accountData }) {
         return
       }
 
-      // Step 2: Update password
       await updatePassword(user, formData.newPassword)
 
-      // Step 3: Refresh user data to ensure context stays updated
       await refreshUserData()
 
-      // Step 4: Show success message and reset form
       setSuccessMessage('Your password has been changed successfully.')
       setFormData({
         currentPassword: '',
@@ -194,194 +178,172 @@ function AccountInformation({ accountData }) {
 
   return (
     <>
-      <div className="account-info-card">
-        {/*MyProfile Image*/}
-        <div className="profile-image-section">
-          <form className="profile-image-form d-flex flex-column align-items-center">
-            <div className="profile-image-wrapper mb-3">
-              <img
-                src={accountData?.profileImage || DefaultProfile}
-                alt="Profile"
-                className="profile-img"
-              />
-            </div>
-            <div className="profile-upload-controls">
-              <input
-                type="file"
-                className="form-control file-select-input"
-                placeholder="Select file"
-                readOnly
-              />
-              <button type="submit" className="btn btn-primary save-file-btn">
-                Save
-              </button>
-            </div>
-          </form>
-        </div>
+      <div className="account-form-section">
+        <form onSubmit={handleUpdate}>
+          <h3 className="section-title">ACCOUNT INFORMATION</h3>
 
-        <br />
-
-        <div className="account-form-section">
-          <form onSubmit={handleUpdate}>
-            <h3 className="section-title">ACCOUNT INFORMATION</h3>
-
-            {/* Success Message */}
-            {successMessage && (
-              <div
-                className="alert alert-success d-flex align-items-center"
-                role="alert"
-              >
-                <i className="fa-solid fa-circle-check bi flex-shrink-0 me-2"></i>
-                <div>{successMessage}</div>
-              </div>
-            )}
-
-            {/* Error Message */}
-            {generalError && (
-              <div
-                className="alert alert-danger d-flex align-items-center"
-                role="alert"
-              >
-                <i className="fa-solid fa-triangle-exclamation bi flex-shrink-0 me-2"></i>
-                <div>{generalError}</div>
-              </div>
-            )}
-
-            {/* Email */}
-            <div className="form-group ai-email-group">
-              <label className="form-label">Email / Username:</label>
-              <small className="text-muted d-block mb-1">
-                Email cannot be changed for security purposes.
-              </small>
-              <input
-                type="email"
-                className="form-control"
-                value={accountData?.email || ''}
-                readOnly={true}
-              />
-            </div>
-
-            {/* Current Password */}
-            <div className="form-group">
-              <label className="form-label">Current Password:</label>
-              <small className="text-muted d-block mb-1">
-                Your current password is not displayed here for security
-                purposes.
-              </small>
-              <input
-                ref={currentPasswordRef}
-                type="password"
-                name="currentPassword"
-                className={`form-control ${
-                  validationErrors.currentPassword ? 'is-invalid' : ''
-                }`}
-                placeholder="Enter your current password"
-                value={formData.currentPassword}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-              />
-              {validationErrors.currentPassword && (
-                <div className="invalid-feedback">
-                  {validationErrors.currentPassword}
-                </div>
-              )}
-            </div>
-
-            {/* New Password */}
-            <div className="form-group">
-              <label className="form-label">New Password:</label>
-              <small>
-                <span className="text-muted d-block mb-1">
-                  Your password must have the following:
-                </span>
-                <ul className="text-muted pl-3">
-                  <li
-                    className={
-                      passwordRequirements.minLength
-                        ? 'text-success fw-bold'
-                        : ''
-                    }
-                  >
-                    8 character minimum
-                  </li>
-                  <li
-                    className={
-                      passwordRequirements.specialChar
-                        ? 'text-success fw-bold'
-                        : ''
-                    }
-                  >
-                    1 allowed special character (! @ # $ % & ^ * + -)
-                  </li>
-                  <li
-                    className={
-                      passwordRequirements.uppercase
-                        ? 'text-success fw-bold'
-                        : ''
-                    }
-                  >
-                    1 uppercase letter (A-Z)
-                  </li>
-                  <li
-                    className={
-                      passwordRequirements.number ? 'text-success fw-bold' : ''
-                    }
-                  >
-                    1 number (0-9)
-                  </li>
-                </ul>
-              </small>
-              <input
-                type="password"
-                name="newPassword"
-                className={`form-control ${
-                  validationErrors.newPassword ? 'is-invalid' : ''
-                }`}
-                placeholder="Your strong new password"
-                value={formData.newPassword}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-              />
-              {validationErrors.newPassword && (
-                <div className="invalid-feedback">
-                  {validationErrors.newPassword}
-                </div>
-              )}
-            </div>
-
-            {/* Confirm Password */}
-            <div className="form-group">
-              <label className="form-label">Confirm Password:</label>
-              <small className="text-muted d-block mb-1">
-                Please re-enter your new password for confirmation.
-              </small>
-              <input
-                type="password"
-                name="confirmPassword"
-                className={`form-control ${
-                  validationErrors.confirmPassword ? 'is-invalid' : ''
-                }`}
-                placeholder="Re-enter your new password"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-              />
-              {validationErrors.confirmPassword && (
-                <div className="invalid-feedback">
-                  {validationErrors.confirmPassword}
-                </div>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary update-account-btn w-100"
-              disabled={isSubmitting}
+          {/* Success Message */}
+          {successMessage && (
+            <div
+              className="alert alert-success d-flex align-items-center"
+              role="alert"
             >
-              {isSubmitting ? 'Updating...' : 'Update Password'}
-            </button>
-          </form>
-        </div>
+              <i className="fa-solid fa-circle-check bi flex-shrink-0 me-2"></i>
+              <div>{successMessage}</div>
+            </div>
+          )}
+
+          {/* Error Message */}
+          {generalError && (
+            <div
+              className="alert alert-danger d-flex align-items-center"
+              role="alert"
+            >
+              <i className="fa-solid fa-triangle-exclamation bi flex-shrink-0 me-2"></i>
+              <div>{generalError}</div>
+            </div>
+          )}
+
+          {/* Email */}
+          <div className="form-group ai-email-group">
+            <label className="form-label">Email / Username:</label>
+            <small className="text-muted d-block mb-1">
+              Email cannot be changed for security purposes.
+            </small>
+            <input
+              type="email"
+              className="form-control"
+              value={accountData?.email || ''}
+              readOnly={true}
+            />
+          </div>
+
+          {/* Current Password */}
+          <div className="form-group">
+            <label className="form-label">Current Password:</label>
+            <small className="text-muted d-block mb-1">
+              Your current password is not displayed here for security purposes.
+            </small>
+            <input
+              ref={currentPasswordRef}
+              type="password"
+              name="currentPassword"
+              className={`form-control ${
+                validationErrors.currentPassword ? 'is-invalid' : ''
+              }`}
+              placeholder="Enter your current password"
+              value={formData.currentPassword}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+            />
+            {validationErrors.currentPassword && (
+              <div className="invalid-feedback">
+                {validationErrors.currentPassword}
+              </div>
+            )}
+          </div>
+
+          {/* New Password */}
+          <div className="form-group">
+            <label className="form-label">New Password:</label>
+            <small>
+              <span className="text-muted d-block mb-1">
+                Your password must have the following:
+              </span>
+              <ul className="text-muted pl-3">
+                <li
+                  className={
+                    passwordRequirements.minLength ? 'text-success fw-bold' : ''
+                  }
+                >
+                  8 character minimum
+                </li>
+                <li
+                  className={
+                    passwordRequirements.specialChar
+                      ? 'text-success fw-bold'
+                      : ''
+                  }
+                >
+                  1 allowed special character (! @ # $ % & ^ * + -)
+                </li>
+                <li
+                  className={
+                    passwordRequirements.uppercase ? 'text-success fw-bold' : ''
+                  }
+                >
+                  1 uppercase letter (A-Z)
+                </li>
+                <li
+                  className={
+                    passwordRequirements.number ? 'text-success fw-bold' : ''
+                  }
+                >
+                  1 number (0-9)
+                </li>
+              </ul>
+            </small>
+            <input
+              type="password"
+              name="newPassword"
+              className={`form-control ${
+                validationErrors.newPassword ? 'is-invalid' : ''
+              }`}
+              placeholder="Your strong new password"
+              value={formData.newPassword}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+            />
+            {validationErrors.newPassword && (
+              <div className="invalid-feedback">
+                {validationErrors.newPassword}
+              </div>
+            )}
+          </div>
+
+          {/* Confirm Password */}
+          <div className="form-group">
+            <label className="form-label">Confirm Password:</label>
+            <small className="text-muted d-block mb-1">
+              Please re-enter your new password for confirmation.
+            </small>
+            <input
+              type="password"
+              name="confirmPassword"
+              className={`form-control ${
+                validationErrors.confirmPassword ? 'is-invalid' : ''
+              }`}
+              placeholder="Re-enter your new password"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+            />
+            {validationErrors.confirmPassword && (
+              <div className="invalid-feedback">
+                {validationErrors.confirmPassword}
+              </div>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary update-account-btn w-100"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                Updating...
+              </>
+            ) : (
+              'Update Password'
+            )}
+          </button>
+        </form>
       </div>
     </>
   )
