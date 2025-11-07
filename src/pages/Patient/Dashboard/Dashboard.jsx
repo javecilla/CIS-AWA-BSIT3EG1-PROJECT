@@ -5,6 +5,7 @@ import AppointmentHistory from '@/components/AppointmentHistory'
 import ConsultationImage from '@/assets/images/consultation.png'
 import DefaultProfile from '@/assets/images/default-profile.png'
 import { useUser } from '@/contexts/UserContext'
+import { NavLink } from 'react-router-dom'
 
 function Dashboard() {
   const { userData, loading } = useUser()
@@ -46,7 +47,9 @@ function Dashboard() {
                     vaccination appointment.
                   </p>
                   <button className="btn btn-primary custom-btn align-self-center align-self-md-start">
-                    Make an Appointment
+                    <NavLink to="/p/make-appointment" className="dashboard-to-appointment-btn">
+                      Make Appointment
+                    </NavLink>
                   </button>
                 </div>
               </div>
