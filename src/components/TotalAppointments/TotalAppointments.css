@@ -1,0 +1,11 @@
+.total-appointment-container {
+  position: relative;
+}
+
+i {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 24px;
+  z-index: 1000;
+}
