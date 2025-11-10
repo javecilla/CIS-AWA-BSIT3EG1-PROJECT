@@ -1,3 +1,5 @@
+![Logo](https://jerome-avecilla.infinityfreeapp.com/assets/images/abc-banner.png)
+
 # Clinic Information System - Patient Management Module
 
 This project is a web application developed for the IT 305W | ADVANCED WEB APPLICATIONS course at Bulacan State University.
@@ -102,8 +104,8 @@ _Goal: Build staff tools, integrate everything, conduct final testing, and submi
 
 | Task                                       | Assigned To | Priority | Due Date     | Remarks |
 | :----------------------------------------- | :---------- | :------- | :----------- | :------ |
-| **FE: Staff Dashboard & Patient Profile**  | Rensen        | **High** | Nov 10 (Mon) | Pending |
-| **BE: Fetch Appointments & Update Patient Data**  | Jerome      | **High** | Nov 10 (Mon) | Pending |
+| **FE: Staff Dashboard & Patient Profile**  | Rensen        | **High** | Nov 10 (Mon) | **Done** |
+| **BE: Fetch Appointments & Update Patient Data**  | Jerome      | **High** | Nov 10 (Mon) | **Done** |
 | **FE: Walk-in Patient Registration Form**  | Mico        | Medium   | Nov 11 (Tue) | Pending |
 | **BE: Staff-side Patient Registration**    | Jerome      | Medium   | Nov 11 (Tue) | Pending |
 | **BE: Cleaning and Polishing Code**        | Jerome      | Medium   | Nov 12 (Wed) | Pending |
