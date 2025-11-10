@@ -11,7 +11,7 @@ import { useUser } from '@/contexts/UserContext'
 import './UserImageProfile.css'
 import DefaultProfile from '@/assets/images/default-profile.png'
 
-function UserImageProfile({ userData }) {
+function UserImageProfile({ userData, action = 'edit' }) {
   const { refreshUserData } = useUser()
   const fileInputRef = useRef(null)
 
@@ -240,61 +240,67 @@ function UserImageProfile({ userData }) {
             onError={handleImageError}
           />
         </div>
-        <small className="text-muted d-block mb-1">
-          Update profile with accepted formats (e.g., .png, .jpg, .jpeg)
-        </small>
-        <div className="profile-upload-controls">
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="form-control file-select-input"
-            placeholder="Select file"
-            accept="image/png, image/jpeg, image/jpg"
-            onChange={handleFileChange}
-            disabled={isUploading}
-          />
 
-          {!selectedFile ? (
-            <button
-              type="submit"
-              className="btn btn-primary save-file-btn"
-              disabled
-              style={{ display: 'none' }}
-            >
-              Save
-            </button>
-          ) : (
-            <button
-              type="submit"
-              className="btn btn-primary save-file-btn"
-              disabled={isUploading}
-            >
-              {isUploading ? (
-                <>
-                  <span
-                    className="spinner-border spinner-border-sm me-2"
-                    role="status"
-                    aria-hidden="true"
-                  ></span>
-                  Saving...
-                </>
+        {action === 'edit' && (
+          <>
+            <small className="text-muted d-block mb-1">
+              Update profile with accepted formats (e.g., .png, .jpg, .jpeg)
+            </small>
+
+            <div className="profile-upload-controls">
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="form-control file-select-input"
+                placeholder="Select file"
+                accept="image/png, image/jpeg, image/jpg"
+                onChange={handleFileChange}
+                disabled={isUploading}
+              />
+
+              {!selectedFile ? (
+                <button
+                  type="submit"
+                  className="btn btn-primary save-file-btn"
+                  disabled
+                  style={{ display: 'none' }}
+                >
+                  Save
+                </button>
               ) : (
-                'Save'
+                <button
+                  type="submit"
+                  className="btn btn-primary save-file-btn"
+                  disabled={isUploading}
+                >
+                  {isUploading ? (
+                    <>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Saving...
+                    </>
+                  ) : (
+                    'Save'
+                  )}
+                </button>
               )}
-            </button>
-          )}
 
-          {selectedFile && (
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={handleRemove}
-              disabled={isUploading}
-            >
-              Remove
-            </button>
-          )}
-        </div>
+              {selectedFile && (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleRemove}
+                  disabled={isUploading}
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+          </>
+        )}
 
         {fileError && <small className="text-danger">{fileError}</small>}
       </form>

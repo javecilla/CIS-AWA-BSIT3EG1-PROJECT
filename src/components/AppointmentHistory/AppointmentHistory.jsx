@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { ref, get, update } from 'firebase/database'
 import { db, auth } from '@/libs/firebase.js'
 import './AppointmentHistory.css'
+import { formatDateTime, formatDate } from '@/utils/formatter.js'
 
-function AppointmentHistory() {
+function AppointmentHistory({ patientUID = null, action = '' }) {
   const [appointments, setAppointments] = useState([])
   const [filteredAppointments, setFilteredAppointments] = useState([])
   const [loading, setLoading] = useState(true)
@@ -38,28 +39,29 @@ function AppointmentHistory() {
       setAlertType('')
     }, 5000)
 
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    // window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   useEffect(() => {
     fetchAppointments()
-  }, [])
+  }, [patientUID])
 
   useEffect(() => {
     handleSearch()
   }, [searchQuery, appointments])
 
   const fetchAppointments = async () => {
-    const user = auth.currentUser
-    if (!user) {
-      setError('You must be logged in to view appointments.')
-      setLoading(false)
-      return
-    }
-
     try {
       setLoading(true)
-      const appointmentsRef = ref(db, `appointments/${user.uid}`)
+
+      let uidToFetch = patientUID || (auth.currentUser && auth.currentUser.uid)
+      if (!uidToFetch) {
+        setError('No valid user ID available.')
+        setLoading(false)
+        return
+      }
+
+      const appointmentsRef = ref(db, `appointments/${uidToFetch}`)
       const snapshot = await get(appointmentsRef)
 
       if (snapshot.exists()) {
@@ -112,30 +114,6 @@ function AppointmentHistory() {
 
     setFilteredAppointments(filtered)
     setCurrentPage(1)
-  }
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    const options = {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      weekday: 'short'
-    }
-    return date.toLocaleDateString('en-US', options)
-  }
-
-  const formatDateTime = (dateTimeString) => {
-    const date = new Date(dateTimeString)
-    const options = {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    }
-    return date.toLocaleString('en-US', options)
   }
 
   const getStatusBadgeClass = (status) => {
@@ -355,11 +333,14 @@ function AppointmentHistory() {
 
   if (loading) {
     return (
-      <div className="text-center py-5">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading appointments...</span>
+      <div className="container py-5 d-flex align-items-center min-vh-100 justify-content-center">
+        <div
+          className="spinner-border"
+          role="status"
+          style={{ width: '3rem', height: '3rem' }}
+        >
+          <span className="visually-hidden">Loading...</span>
         </div>
-        <p className="mt-3">Loading your appointment history...</p>
       </div>
     )
   }
@@ -373,12 +354,16 @@ function AppointmentHistory() {
     )
   }
 
+  // console.log(currentRecords)
+
   return (
     <>
       <div className="appointment-top-section d-flex flex-row justify-content-between flex-wrap">
         <div className="appointment-history">
-          <h3>Your Appointment History</h3>
-          <p>Showing all your past and upcoming visits</p>
+          <h3>{action ? 'Patient' : 'Your '} Appointment History</h3>
+          <p>
+            Showing all {action ? 'patient' : 'your '} past and upcoming visits
+          </p>
         </div>
       </div>
 
@@ -417,61 +402,122 @@ function AppointmentHistory() {
 
       <div className="appointment-table">
         <div className="table-responsive">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Date & Time</th>
-                <th>Branch</th>
-                <th>Reason / Dose</th>
-                <th>Status</th>
-                <th className="text-end">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentRecords.length > 0 ? (
-                currentRecords.map((appointment) => (
-                  <tr key={appointment.id}>
-                    <td>
-                      {formatDate(appointment.appointmentDate)}{' '}
-                      {appointment.timeSlot}
-                    </td>
-                    <td>{appointment.branch}</td>
-                    <td>{getReasonLabel(appointment)}</td>
-                    <td>
-                      <span
-                        className={`badge rounded-pill ${getStatusBadgeClass(
-                          appointment.status
-                        )}`}
-                      >
-                        {appointment.status}
-                      </span>
-                    </td>
-                    <td className="text-end">
-                      <button
-                        className="btn btn-outline-secondary btn-sm me-2"
-                        onClick={() => handleViewDetails(appointment.id)}
-                      >
-                        View Details
-                      </button>
-
-                      {appointment.type === 'FollowUp' &&
-                        appointment.status === 'Pending' && (
+          {action ? (
+            <>
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Patient ID</th>
+                    <th>Date & Time</th>
+                    <th>Branch</th>
+                    <th>Reason / Dose</th>
+                    <th className="text-end">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentRecords.length > 0 ? (
+                    currentRecords.map((appointment) => (
+                      <tr key={appointment.id}>
+                        <td>{appointment.id}</td>
+                        <td>
+                          {formatDate(appointment.appointmentDate)}{' '}
+                          {appointment.timeSlot}
+                        </td>
+                        <td>{appointment.branch}</td>
+                        <td>{getReasonLabel(appointment)}</td>
+                        <td className="text-end">
+                          <span
+                            className={`badge rounded-pill ${getStatusBadgeClass(
+                              appointment.status
+                            )}`}
+                          >
+                            {appointment.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="text-center py-4">
+                        {searchQuery ? (
                           <>
-                            <button
-                              className="btn btn-outline-secondary btn-sm me-2"
-                              onClick={() => handleReschedule(appointment.id)}
-                            >
-                              Reschedule
-                            </button>
-                            <button
-                              className="btn btn-outline-secondary btn-sm"
-                              onClick={() => handleCancel(appointment.id)}
-                            >
-                              Cancel
-                            </button>
+                            <i className="fa-solid fa-magnifying-glass fs-3 text-muted mb-2"></i>
+                            <p className="mb-0">
+                              No appointments found matching "{searchQuery}"
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="mb-0">
+                              No appointment history records found
+                            </p>
                           </>
                         )}
-                      {/* {appointment.type === 'FollowUp' &&
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </>
+          ) : (
+            <>
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Date & Time</th>
+                    <th>Branch</th>
+                    <th>Reason / Dose</th>
+                    <th>Status</th>
+                    <th className="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentRecords.length > 0 ? (
+                    currentRecords.map((appointment) => (
+                      <tr key={appointment.id}>
+                        <td>
+                          {formatDate(appointment.appointmentDate)}{' '}
+                          {appointment.timeSlot}
+                        </td>
+                        <td>{appointment.branch}</td>
+                        <td>{getReasonLabel(appointment)}</td>
+                        <td>
+                          <span
+                            className={`badge rounded-pill ${getStatusBadgeClass(
+                              appointment.status
+                            )}`}
+                          >
+                            {appointment.status}
+                          </span>
+                        </td>
+                        <td className="text-end">
+                          <button
+                            className="btn btn-outline-secondary btn-sm me-2"
+                            onClick={() => handleViewDetails(appointment.id)}
+                          >
+                            View Details
+                          </button>
+
+                          {appointment.type === 'FollowUp' &&
+                            appointment.status === 'Pending' && (
+                              <>
+                                <button
+                                  className="btn btn-outline-secondary btn-sm me-2"
+                                  onClick={() =>
+                                    handleReschedule(appointment.id)
+                                  }
+                                >
+                                  Reschedule
+                                </button>
+                                <button
+                                  className="btn btn-outline-secondary btn-sm"
+                                  onClick={() => handleCancel(appointment.id)}
+                                >
+                                  Cancel
+                                </button>
+                              </>
+                            )}
+                          {/* {appointment.type === 'FollowUp' &&
                         appointment.status === 'Cancelled' && (
                           <button
                             className="btn btn-outline-secondary btn-sm"
@@ -480,35 +526,33 @@ function AppointmentHistory() {
                             Re-Book
                           </button>
                         )} */}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="text-center py-4">
-                    {searchQuery ? (
-                      <>
-                        <i className="fa-solid fa-magnifying-glass fs-3 text-muted mb-2"></i>
-                        <p className="mb-0">
-                          No appointments found matching "{searchQuery}"
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <i className="fa-solid fa-calendar-xmark fs-3 text-muted mb-2"></i>
-                        <p className="mb-0">
-                          No appointment history records found
-                        </p>
-                        <small className="text-muted">
-                          Make your first appointment to get started
-                        </small>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="text-center py-4">
+                        {searchQuery ? (
+                          <>
+                            <i className="fa-solid fa-magnifying-glass fs-3 text-muted mb-2"></i>
+                            <p className="mb-0">
+                              No appointments found matching "{searchQuery}"
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="mb-0">
+                              No appointment history records found
+                            </p>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </>
+          )}
         </div>
       </div>
 

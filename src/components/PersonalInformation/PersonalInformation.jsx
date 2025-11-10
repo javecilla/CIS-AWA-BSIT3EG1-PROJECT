@@ -5,7 +5,7 @@ import { calculateAge } from '@/utils/calculator'
 import './PersonalInformation.css'
 import { useUser } from '@/contexts/UserContext'
 
-function PersonalInformation({ patientData }) {
+function PersonalInformation({ patientData, action = 'edit' }) {
   const { refreshUserData } = useUser()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [generalError, setGeneralError] = useState('')
@@ -34,6 +34,8 @@ function PersonalInformation({ patientData }) {
       patientData.emergencyContact.relationship || '',
     emergencyContactMobile: patientData.emergencyContact.mobileNumber || ''
   })
+
+  const isEditing = action === 'edit' ? true : false
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -262,6 +264,7 @@ function PersonalInformation({ patientData }) {
                 value={formData.firstName}
                 onChange={handleInputChange}
                 placeholder="e.g., John"
+                readOnly={!isEditing}
               />
               {validationErrors.firstName && (
                 <div className="invalid-feedback">
@@ -282,6 +285,7 @@ function PersonalInformation({ patientData }) {
                 value={formData.lastName}
                 onChange={handleInputChange}
                 placeholder="e.g., Doe"
+                readOnly={!isEditing}
               />
               {validationErrors.lastName && (
                 <div className="invalid-feedback">
@@ -297,7 +301,11 @@ function PersonalInformation({ patientData }) {
           <div className="col-12 col-md-6">
             <div className="form-group">
               <label className="form-label">Middle Name:</label>
-              <small className="text-muted d-block mb-1">
+              <small
+                className={`text-muted d-block mb-1 ${
+                  action === 'view' && 'd-none'
+                }`}
+              >
                 Optional. Leave blank if not applicable.
               </small>
               <input
@@ -309,6 +317,7 @@ function PersonalInformation({ patientData }) {
                 value={formData.middleName}
                 onChange={handleInputChange}
                 placeholder="e.g., Miller"
+                readOnly={!isEditing}
               />
               {validationErrors.middleName && (
                 <div className="invalid-feedback">
@@ -320,7 +329,11 @@ function PersonalInformation({ patientData }) {
           <div className="col-12 col-md-6">
             <div className="form-group">
               <label className="form-label">Suffix:</label>
-              <small className="text-muted d-block mb-1">
+              <small
+                className={`text-muted d-block mb-1 ${
+                  action === 'view' && 'd-none'
+                }`}
+              >
                 Optional. Leave blank if not applicable.
               </small>
               <input
@@ -332,6 +345,7 @@ function PersonalInformation({ patientData }) {
                 value={formData.suffix}
                 onChange={handleInputChange}
                 placeholder="e.g., Jr., Sr., III"
+                readOnly={!isEditing}
               />
               {validationErrors.suffix && (
                 <div className="invalid-feedback">
@@ -347,7 +361,11 @@ function PersonalInformation({ patientData }) {
           <div className="col-12 col-md-6">
             <div className="form-group">
               <label className="form-label">Date of Birth:</label>
-              <small className="text-muted d-block mb-1">
+              <small
+                className={`text-muted d-block mb-1 ${
+                  action === 'view' && 'd-none'
+                }`}
+              >
                 Your birthday based on your PSA.
               </small>
               <div className="d-flex align-items-center gap-2">
@@ -359,6 +377,7 @@ function PersonalInformation({ patientData }) {
                   }`}
                   value={formData.dateOfBirth}
                   onChange={handleInputChange}
+                  readOnly={!isEditing}
                 />
                 <span className="age-label">
                   Age:{' '}
@@ -377,16 +396,21 @@ function PersonalInformation({ patientData }) {
           <div className="col-12 col-md-6">
             <div className="form-group">
               <label className="form-label">Sex:</label>
-              <small className="text-muted d-block mb-1">
+              <small
+                className={`text-muted d-block mb-1 ${
+                  action === 'view' && 'd-none'
+                }`}
+              >
                 Select from the list.
               </small>
               <select
                 name="sex"
-                className={`form-select ${
+                className={`form-${isEditing ? 'select' : 'control'} ${
                   validationErrors.sex ? 'is-invalid' : ''
                 }`}
                 value={formData.sex}
                 onChange={handleInputChange}
+                readOnly={!isEditing}
               >
                 <option value="">Select</option>
                 <option value="Male">Male</option>
@@ -402,7 +426,11 @@ function PersonalInformation({ patientData }) {
         {/*House No and Street*/}
         <div className="form-group">
           <label className="form-label">House No. & Street:</label>
-          <small className="text-muted d-block mb-1">
+          <small
+            className={`text-muted d-block mb-1 ${
+              action === 'view' && 'd-none'
+            }`}
+          >
             Enter the patient's street address.
           </small>
           <input
@@ -414,6 +442,7 @@ function PersonalInformation({ patientData }) {
             value={formData.houseNoStreet}
             onChange={handleInputChange}
             placeholder="e.g., 123 Main St."
+            readOnly={!isEditing}
           />
           {validationErrors.houseNoStreet && (
             <div className="invalid-feedback">
@@ -427,7 +456,11 @@ function PersonalInformation({ patientData }) {
           <div className="col-12 col-md-6">
             <div className="form-group">
               <label className="form-label">Barangay:</label>
-              <small className="text-muted d-block mb-1">
+              <small
+                className={`text-muted d-block mb-1 ${
+                  action === 'view' && 'd-none'
+                }`}
+              >
                 Enter the barangay.
               </small>
               <input
@@ -439,6 +472,7 @@ function PersonalInformation({ patientData }) {
                 value={formData.barangay}
                 onChange={handleInputChange}
                 placeholder="e.g., Brgy. 143"
+                readOnly={!isEditing}
               />
               {validationErrors.barangay && (
                 <div className="invalid-feedback">
@@ -450,7 +484,11 @@ function PersonalInformation({ patientData }) {
           <div className="col-12 col-md-6">
             <div className="form-group">
               <label className="form-label">City / Municipality:</label>
-              <small className="text-muted d-block mb-1">
+              <small
+                className={`text-muted d-block mb-1 ${
+                  action === 'view' && 'd-none'
+                }`}
+              >
                 Enter the city or municipality.
               </small>
               <input
@@ -462,6 +500,7 @@ function PersonalInformation({ patientData }) {
                 value={formData.cityMunicipality}
                 onChange={handleInputChange}
                 placeholder="e.g., Pandi"
+                readOnly={!isEditing}
               />
               {validationErrors.cityMunicipality && (
                 <div className="invalid-feedback">
@@ -477,7 +516,11 @@ function PersonalInformation({ patientData }) {
           <div className="col-12 col-md-6">
             <div className="form-group">
               <label className="form-label">Province:</label>
-              <small className="text-muted d-block mb-1">
+              <small
+                className={`text-muted d-block mb-1 ${
+                  action === 'view' && 'd-none'
+                }`}
+              >
                 Enter the province.
               </small>
               <input
@@ -489,6 +532,7 @@ function PersonalInformation({ patientData }) {
                 value={formData.province}
                 onChange={handleInputChange}
                 placeholder="e.g., Bulacan"
+                readOnly={!isEditing}
               />
               {validationErrors.province && (
                 <div className="invalid-feedback">
@@ -500,7 +544,11 @@ function PersonalInformation({ patientData }) {
           <div className="col-12 col-md-6">
             <div className="form-group">
               <label className="form-label">Zip Code:</label>
-              <small className="text-muted d-block mb-1">
+              <small
+                className={`text-muted d-block mb-1 ${
+                  action === 'view' && 'd-none'
+                }`}
+              >
                 Optional. Numbers only.
               </small>
               <input
@@ -512,6 +560,7 @@ function PersonalInformation({ patientData }) {
                 value={formData.zipCode}
                 onChange={handleInputChange}
                 placeholder="e.g., 3014"
+                readOnly={!isEditing}
               />
               {validationErrors.zipCode && (
                 <div className="invalid-feedback">
@@ -529,7 +578,11 @@ function PersonalInformation({ patientData }) {
         {/*Mobile Number*/}
         <div className="form-group">
           <label className="form-label">Mobile Number:</label>
-          <small className="text-muted d-block mb-1">
+          <small
+            className={`text-muted d-block mb-1 ${
+              action === 'view' && 'd-none'
+            }`}
+          >
             Used for sending critical SMS reminders. Must start with 09 or +639.
           </small>
           <input
@@ -541,6 +594,7 @@ function PersonalInformation({ patientData }) {
             value={formData.mobileNumber}
             onChange={handleInputChange}
             placeholder="e.g., 09*******22"
+            readOnly={!isEditing}
           />
           {validationErrors.mobileNumber && (
             <div className="invalid-feedback">
@@ -552,7 +606,11 @@ function PersonalInformation({ patientData }) {
         {/*Emergency Contact Name*/}
         <div className="form-group">
           <label className="form-label">Emergency Contact Name:</label>
-          <small className="text-muted d-block mb-1">
+          <small
+            className={`text-muted d-block mb-1 ${
+              action === 'view' && 'd-none'
+            }`}
+          >
             Who should we call in an emergency?
           </small>
           <input
@@ -564,6 +622,7 @@ function PersonalInformation({ patientData }) {
             value={formData.emergencyContactName}
             onChange={handleInputChange}
             placeholder="e.g., Jane Smith"
+            readOnly={!isEditing}
           />
           {validationErrors.emergencyContactName && (
             <div className="invalid-feedback">
@@ -577,7 +636,11 @@ function PersonalInformation({ patientData }) {
           <div className="col-12 col-md-6">
             <div className="form-group">
               <label className="form-label">Relationship to Patient:</label>
-              <small className="text-muted d-block mb-1">
+              <small
+                className={`text-muted d-block mb-1 ${
+                  action === 'view' && 'd-none'
+                }`}
+              >
                 What is their relationship to the patient?
               </small>
               <input
@@ -591,6 +654,7 @@ function PersonalInformation({ patientData }) {
                 value={formData.emergencyContactRelationship}
                 onChange={handleInputChange}
                 placeholder="e.g., Spouse, Mother, Sibling"
+                readOnly={!isEditing}
               />
               {validationErrors.emergencyContactRelationship && (
                 <div className="invalid-feedback">
@@ -604,7 +668,11 @@ function PersonalInformation({ patientData }) {
               <label className="form-label">
                 Emergency Contact's Mobile Number:
               </label>
-              <small className="text-muted d-block mb-1">
+              <small
+                className={`text-muted d-block mb-1 ${
+                  action === 'view' && 'd-none'
+                }`}
+              >
                 Must start with 09 or +639.
               </small>
               <input
@@ -616,6 +684,7 @@ function PersonalInformation({ patientData }) {
                 value={formData.emergencyContactMobile}
                 onChange={handleInputChange}
                 placeholder="e.g., 09*******88"
+                readOnly={!isEditing}
               />
               {validationErrors.emergencyContactMobile && (
                 <div className="invalid-feedback">
@@ -626,24 +695,26 @@ function PersonalInformation({ patientData }) {
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="btn btn-primary update-account-btn w-100"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <>
-              <span
-                className="spinner-border spinner-border-sm me-2"
-                role="status"
-                aria-hidden="true"
-              ></span>
-              Updating...
-            </>
-          ) : (
-            'Update Information'
-          )}
-        </button>
+        {isEditing && (
+          <button
+            type="submit"
+            className="btn btn-primary update-account-btn w-100"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                Updating...
+              </>
+            ) : (
+              'Update Information'
+            )}
+          </button>
+        )}
       </form>
     </div>
   )

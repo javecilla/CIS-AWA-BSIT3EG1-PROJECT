@@ -1,139 +1,111 @@
 import { useState, useEffect } from 'react'
-import { ref, get } from 'firebase/database'
-import { db, auth } from '@/libs/firebase.js'
+import { ref, get, remove } from 'firebase/database'
+import { db } from '@/libs/firebase.js'
 import './PatientRegisteredList.css'
+import { formatFullName } from '@/utils/formatter.js'
+import { useRoleNavigation } from '@/hooks/useRoleNavigation'
 
 function PatientRegisteredList() {
-  const [appointments, setAppointments] = useState([])
-  const [filteredAppointments, setFilteredAppointments] = useState([])
+  const [patients, setPatients] = useState([])
+  const [filteredPatients, setFilteredPatients] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
 
+  const [alertMessage, setAlertMessage] = useState('')
+  const [alertType, setAlertType] = useState('')
+
   const [currentPage, setCurrentPage] = useState(1)
   const [recordsPerPage] = useState(5)
 
+  const { navigate } = useRoleNavigation()
+
+  const showAlert = (message, type) => {
+    setAlertMessage(message)
+    setAlertType(type)
+
+    setTimeout(() => {
+      setAlertMessage('')
+      setAlertType('')
+    }, 5000)
+
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   useEffect(() => {
-    fetchAppointments()
+    fetchPatients()
   }, [])
 
-  //update filtered results kapad nag search query or appointments change
   useEffect(() => {
     handleSearch()
-  }, [searchQuery, appointments])
+  }, [searchQuery, patients])
 
-  const fetchAppointments = async () => {
-    const user = auth.currentUser
-    if (!user) {
-      setError('You must be logged in to view appointments.')
-      setLoading(false)
-      return
-    }
-
+  const fetchPatients = async () => {
+    setLoading(true)
     try {
-      setLoading(true)
-      const appointmentsRef = ref(db, `appointments/${user.uid}`)
-      const snapshot = await get(appointmentsRef)
+      const usersRef = ref(db, 'users')
+      const snapshot = await get(usersRef)
 
       if (snapshot.exists()) {
         const data = snapshot.val()
-
-        // Convert object to array and sort by date (newest first)
-        const appointmentsArray = Object.keys(data).map((key) => ({
-          id: key,
-          ...data[key]
+        const allUsers = Object.keys(data).map((uid) => ({
+          uid: uid,
+          ...data[uid]
         }))
 
-        //sort by (newest first)
-        appointmentsArray.sort((a, b) => {
-          const dateA = new Date(a.appointmentDate)
-          const dateB = new Date(b.appointmentDate)
-          return dateB - dateA
-        })
+        const patientList = allUsers.filter((user) => user.role === 'patient')
+        // console.log(patientList[0].fullName)
+        // console.log(formatFullName(patientList[0].fullName))
 
-        setAppointments(appointmentsArray)
-        setFilteredAppointments(appointmentsArray)
+        setPatients(patientList)
+        setFilteredPatients(patientList)
       } else {
-        setAppointments([])
-        setFilteredAppointments([])
+        setPatients([])
+        setFilteredPatients([])
       }
     } catch (err) {
-      console.error('Error fetching appointments:', err)
-      setError('Failed to load appointments. Please try again.')
+      console.error('Error fetching patients:', err)
+      setError('Failed to load patient list. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
   const handleSearch = () => {
-    if (!searchQuery.trim()) {
-      setFilteredAppointments(appointments)
+    const query = searchQuery.toLowerCase()
+    if (!query) {
+      setFilteredPatients(patients)
       setCurrentPage(1)
       return
     }
 
-    const query = searchQuery.toLowerCase()
-    const filtered = appointments.filter((appointment) => {
-      const date = formatDate(appointment.appointmentDate)
-      const branch = appointment.branch.toLowerCase()
-      //   const status = appointment.st    atus.toLowerCase()
-      const reason = getReasonLabel(appointment).toLowerCase()
+    const filtered = patients.filter((patient) => {
+      const name = formatFullName(patient.fullName).toLowerCase()
+      const id = patient.patientId ? patient.patientId.toLowerCase() : ''
+      const email = patient.email ? patient.email.toLowerCase() : ''
+      const contact = patient.contactInfo?.mobileNumber
+        ? patient.contactInfo.mobileNumber
+        : ''
 
       return (
-        date.toLowerCase().includes(query) ||
-        branch.includes(query) ||
-        // status.includes(query)
-        reason.includes(query)
+        name.includes(query) ||
+        id.includes(query) ||
+        email.includes(query) ||
+        contact.includes(query)
       )
     })
 
-    setFilteredAppointments(filtered)
+    setFilteredPatients(filtered)
     setCurrentPage(1)
-  }
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    const options = {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      weekday: 'short'
-    }
-    return date.toLocaleDateString('en-US', options)
-  }
-
-  const getStatusBadgeClass = (status) => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'text-bg-warning'
-      case 'confirmed':
-        return 'text-bg-info'
-      case 'completed':
-        return 'text-bg-success'
-      case 'cancelled':
-      case 'canceled':
-        return 'text-bg-danger'
-      default:
-        return 'text-bg-secondary'
-    }
-  }
-
-  const getReasonLabel = (appointment) => {
-    if (appointment.type === 'Incident' && appointment.incidentDetails) {
-      return appointment.incidentDetails.primaryReason || 'New Bite Incident'
-    } else if (appointment.type === 'FollowUp' && appointment.visitDetails) {
-      return appointment.visitDetails.primaryReason || 'Follow-up Visit'
-    }
-    return 'Consultation'
   }
 
   const indexOfLastRecord = currentPage * recordsPerPage
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage
-  const currentRecords = filteredAppointments.slice(
+  const currentRecords = filteredPatients.slice(
     indexOfFirstRecord,
     indexOfLastRecord
   )
-  const totalPages = Math.ceil(filteredAppointments.length / recordsPerPage)
+  const totalPages = Math.ceil(filteredPatients.length / recordsPerPage)
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
@@ -147,33 +119,34 @@ function PatientRegisteredList() {
     }
   }
 
-  const handleViewDetails = (appointmentId) => {
-    alert('View details for appointment:', appointmentId)
-    // TODO: Implement view details modal or navigation
-  }
+  const handleDelete = async (uid) => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this patient record? Deleting this patient will delete all record associated like their appointments. This action cannot be undone.'
+    )
 
-  const handleReschedule = (appointmentId) => {
-    alert('Reschedule appointment:', appointmentId)
-    // TODO: Implement reschedule functionality
-  }
+    if (!confirmed) return
 
-  const handleCancel = (appointmentId) => {
-    alert('Cancel appointment:', appointmentId)
-    // TODO: Implement cancel functionality
-  }
+    try {
+      const userRef = ref(db, `users/${uid}`)
+      const appointmentsRef = ref(db, `appointments/${uid}`)
 
-  const handleReBook = (appointmentId) => {
-    alert('Re-book appointment:', appointmentId)
-    // TODO: Implement re-book functionality
+      await Promise.all([remove(userRef), remove(appointmentsRef)])
+
+      await fetchPatients()
+      showAlert('Patient record deleted successfully.', 'success')
+    } catch (error) {
+      console.error('Error deleting patient record:', error)
+      showAlert('Failed to delete patient record. Please try again.', 'danger')
+    }
   }
 
   if (loading) {
     return (
       <div className="text-center py-5">
         <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading appointments...</span>
+          <span className="visually-hidden">Loading...</span>
         </div>
-        <p className="mt-3">Loading your appointment history...</p>
+        <p className="mt-3">Loading patient list...</p>
       </div>
     )
   }
@@ -192,81 +165,108 @@ function PatientRegisteredList() {
       <div className="patient-registered-list d-flex flex-row justify-content-between flex-wrap">
         <div className="patient-list">
           <h3>Patient Registered List</h3>
-          <p>Showing all patient appointments for Pandi</p>
+          <p>Showing all registered patient records</p>
         </div>
         <div className="register-walk-in mt-3 mt-md-0">
-          <button className="btn btn-primary custom-btn">
+          <button
+            className="btn btn-primary custom-btn"
+            onClick={() =>
+              alert(
+                '//TODO: navigate to /patient/register page and implement functionality'
+              )
+            }
+          >
             Register Walk-in Patient
           </button>
         </div>
       </div>
+
+      {/* --- SEARCH BAR --- */}
+      <div className="input-group my-3">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search by name, patient ID, email, or contact number..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <button
+          className="btn btn-primary"
+          type="button"
+          onClick={handleSearch}
+        >
+          Search
+        </button>
+      </div>
+
+      {alertMessage && alertType && (
+        <div
+          className={`alert alert-${alertType} d-flex align-items-center mb-3`}
+          role="alert"
+        >
+          <i
+            className={`fa-solid ${
+              alertType === 'success'
+                ? 'fa-check-circle'
+                : 'fa-triangle-exclamation'
+            } bi flex-shrink-0 me-2`}
+          ></i>
+          <div>{alertMessage}</div>
+        </div>
+      )}
 
       <div className="patient-registered-list-table">
         <div className="table-responsive">
           <table className="table">
             <thead>
               <tr>
-                <th>Date & Time</th>
                 <th>Patient Name & ID</th>
                 <th>Email</th>
-                <th>Status</th>
+                <th>Contact</th>
+                <th>Sex</th>
                 <th className="text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
               {currentRecords.length > 0 ? (
-                currentRecords.map((appointment) => (
-                  <tr key={appointment.id}>
+                currentRecords.map((patient) => (
+                  <tr key={patient.uid}>
                     <td>
-                      {formatDate(appointment.appointmentDate)}{' '}
-                      {appointment.timeSlot}
+                      <div className="fw-bold">
+                        {formatFullName(patient.fullName)}
+                      </div>
+                      <small className="text-muted">{patient.patientId}</small>
                     </td>
-                    <td>{appointment.branch}</td>
-                    <td>{getReasonLabel(appointment)}</td>
-                    <td>
-                      <span
-                        className={`badge rounded-pill ${getStatusBadgeClass(
-                          appointment.status
-                        )}`}
-                      >
-                        {appointment.status}
-                      </span>
-                    </td>
+                    <td>{patient.email}</td>
+                    <td>{patient.contactInfo?.mobileNumber || 'N/A'}</td>
+                    <td>{patient.sex}</td>
                     <td className="text-end">
                       <button
                         className="btn btn-outline-secondary btn-sm me-2"
-                        onClick={() => handleViewDetails(appointment.id)}
+                        onClick={() =>
+                          navigate(
+                            `/patient/${patient.uid}/profile?action=view`
+                          )
+                        }
                       >
-                        View Details
+                        View
                       </button>
-
-                      {(appointment.status === 'Pending' ||
-                        appointment.status === 'Confirmed') && (
-                        <>
-                          <button
-                            className="btn btn-outline-secondary btn-sm me-2"
-                            onClick={() => handleReschedule(appointment.id)}
-                          >
-                            Reschedule
-                          </button>
-                          <button
-                            className="btn btn-outline-secondary btn-sm"
-                            onClick={() => handleCancel(appointment.id)}
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      )}
-
-                      {(appointment.status === 'Cancelled' ||
-                        appointment.status === 'Canceled') && (
-                        <button
-                          className="btn btn-outline-secondary btn-sm"
-                          onClick={() => handleReBook(appointment.id)}
-                        >
-                          Re-Book
-                        </button>
-                      )}
+                      <button
+                        className="btn btn-outline-secondary btn-sm me-2"
+                        onClick={() =>
+                          navigate(
+                            `/patient/${patient.uid}/profile?action=edit`
+                          )
+                        }
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => handleDelete(patient.uid)}
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -277,14 +277,14 @@ function PatientRegisteredList() {
                       <>
                         <i className="fa-solid fa-magnifying-glass fs-3 text-muted mb-2"></i>
                         <p className="mb-0">
-                          No appointments found matching "{searchQuery}"
+                          No patients found matching "{searchQuery}"
                         </p>
                       </>
                     ) : (
                       <>
-                        <i className="fa-solid fa-calendar-xmark fs-3 text-muted mb-2"></i>
+                        <i className="fa-solid fa-users fs-3 text-muted mb-2"></i>
                         <p className="mb-0">
-                          No registered patient record found
+                          No registered patient records found.
                         </p>
                       </>
                     )}
@@ -296,13 +296,13 @@ function PatientRegisteredList() {
         </div>
       </div>
 
-      {filteredAppointments.length > 0 && (
+      {filteredPatients.length > recordsPerPage && (
         <div className="patient-bottom-section d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
           <div className="record-text text-center text-md-start">
-            <p>
+            <p className="mb-0">
               Showing {indexOfFirstRecord + 1} to{' '}
-              {Math.min(indexOfLastRecord, filteredAppointments.length)} of{' '}
-              {filteredAppointments.length} records
+              {Math.min(indexOfLastRecord, filteredPatients.length)} of{' '}
+              {filteredPatients.length} records
             </p>
           </div>
           <div className="patient-button-container d-flex gap-3">

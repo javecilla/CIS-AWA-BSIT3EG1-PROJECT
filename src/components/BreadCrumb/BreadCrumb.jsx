@@ -1,4 +1,3 @@
-import React from 'react'
 import { useLocation, Link } from 'react-router-dom'
 import './BreadCrumb.css'
 import { PATIENT, STAFF } from '@/constants/user-roles'
@@ -17,16 +16,19 @@ export default function BreadCrumb() {
   const ignoredSegments = [PATIENT, STAFF]
   segments = segments.filter((seg) => !ignoredSegments.includes(seg))
 
-  // console.log('Breadcrumb segments:', segments)
+  segments = segments.map((seg) => {
+    if (/^[A-Za-z0-9]{15,}$/.test(seg)) return 'patient'
+    return seg
+  })
 
   return (
     <nav className="breadcrumb" aria-label="breadcrumb">
       <ul>
-        {/* hide this dashboard breadcrumb if page is dashboard */}
+        {/* hide dashboard breadcrumb if on dashboard */}
         {segments[0] !== 'dashboard' && (
           <li className="breadcrumb-item">
-            <Link to="/">Dashboard</Link>
-            <span className="slash"> </span>
+            <Link to="/">Dashboard </Link>
+            <span className="slash"></span>
           </li>
         )}
 
@@ -46,7 +48,7 @@ export default function BreadCrumb() {
                 </>
               ) : (
                 <>
-                  <Link to={`/${segment}`}>{label}</Link>
+                  {label}
                   <span className="slash"> </span>
                 </>
               )}
