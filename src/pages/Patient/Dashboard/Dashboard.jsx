@@ -4,9 +4,11 @@ import ProfileCard from '@/components/ProfileCard'
 import AppointmentHistory from '@/components/AppointmentHistory'
 import ConsultationImage from '@/assets/images/consultation.png'
 import { useUser } from '@/contexts/UserContext'
+import { useRoleNavigation } from '@/hooks/useRoleNavigation'
 import { NavLink } from 'react-router-dom'
 
 function Dashboard() {
+  const { getPath } = useRoleNavigation()
   const { userData, loading } = useUser()
   // console.log('User Data in Profile:', userData)
 
@@ -52,7 +54,7 @@ function Dashboard() {
                   vaccination appointment.
                 </p>
                 <NavLink
-                  to="/p/make-appointment"
+                  to={getPath('/make-appointment')}
                   className="btn btn-primary custom-btn align-self-center align-self-md-start"
                 >
                   Make Appointment

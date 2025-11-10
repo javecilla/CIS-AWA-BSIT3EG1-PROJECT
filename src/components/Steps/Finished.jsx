@@ -1,4 +1,4 @@
-import registerImage from '@/assets/images/register-step3-image.png'
+import registerImage from '@/assets/images/register-step3.1-image.png'
 import logoClinic from '@/assets/images/logo-clinic.png'
 
 export default function Finished({ handleRedirect, patientId, userName }) {

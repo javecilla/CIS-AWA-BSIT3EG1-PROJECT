@@ -2,7 +2,7 @@
   position: relative;
 }
 
-i {
+.total-appointment-container i {
   position: absolute;
   top: 15px;
   right: 20px;

@@ -200,10 +200,22 @@ function Register() {
     if (formData.middleName && !nameRegex.test(formData.middleName))
       hasError = true
     if (formData.suffix && !nameRegex.test(formData.suffix)) hasError = true
+    // if (formData.dateOfBirth && formData.dateOfBirth > new Date())
     if (formData.cityMunicipality && !nameRegex.test(formData.cityMunicipality))
       hasError = true
     if (formData.province && !nameRegex.test(formData.province)) hasError = true
     if (formData.zipCode && !zipRegex.test(formData.zipCode)) hasError = true
+
+    if (formData.dateOfBirth) {
+      const selectedDate = new Date(formData.dateOfBirth)
+      const today = new Date()
+      // Reset time to compare dates only
+      today.setHours(0, 0, 0, 0)
+
+      if (selectedDate > today) {
+        hasError = true
+      }
+    }
 
     if (hasError) {
       setShowErrors(true)
@@ -415,7 +427,7 @@ function Register() {
   }
 
   const handleRedirect = () => {
-    navigate('/login')
+    navigate('/auth/login')
   }
 
   return (

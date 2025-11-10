@@ -11,6 +11,7 @@ Animal Bite Center (CIS) /
 │   ├── libs/           # Third-party libraries
 │   ├── constants/      # Static data
 │   ├── context/        # React context providers
+│   ├── hooks/          # Custom hooks
 │   ├── App.jsx         # Root component
 │   ├── index.css       # Base stylesheets
 │   └── main.jsx        # Entry point
@@ -30,6 +31,7 @@ Animal Bite Center (CIS) /
 - **libs/**: Third-party libraries configurations
 - **constants/**: Static data or variables.
 - **context/**: React context providers for state management
+- **hooks/**: Reusable hooks
 
 ### `/public` Directory
 

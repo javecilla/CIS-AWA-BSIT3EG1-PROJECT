@@ -1,33 +1,27 @@
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import { onAuthStateChanged } from 'firebase/auth'
-import { ref, get, child } from 'firebase/database'
-import { auth, db } from '@/libs/firebase.js'
+import {
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useParams
+} from 'react-router-dom'
+
+import { useUser } from '@/contexts/UserContext'
 import { PATIENT, STAFF } from '@/constants/user-roles'
 
 import Navbar from '@/components/Navbar'
 import Login from '@/pages/Login'
 import Register from '@/pages/Patient/Register'
-import SetPassword from '@/pages/Patient/Onboarding/SetPassword'
-import VerifyEmail from '@/pages/Patient/Onboarding/VerifyEmail'
 import PatientDashboard from '@/pages/Patient/Dashboard'
 import PatientProfile from '@/pages/Patient/Profile'
 import PatientMakeAppointment from '@/pages/Patient/MakeAppointment'
-import StaffPatients from '@/pages/Staff/PatientProfile'
-import StaffAppointments from '@/pages/Staff/RegisterPatient'
 import StaffDashboard from '@/pages/Staff/Dashboard'
-
-import TestFirebaseDatabase from '@/pages/TestingDemo/FirbaseDatabase'
-import TestFirebaseStorage from '@/pages/TestingDemo/FirebaseStorage'
-import TestFirebaseAuthentication from '@/pages/TestingDemo/FirebaseAuthentication'
-import SendEmail from '@/pages/TestingDemo/SendEmail'
-import MockRegister from '@/pages/TestingDemo/MockRegisterFlow'
-import MockLogin from '@/pages/TestingDemo/MockLoginFlow'
-
-import { useUser } from '@/contexts/UserContext'
+import StaffPatientProfile from '@/pages/Staff/PatientProfile'
+import StaffRegisterPatient from '@/pages/Staff/RegisterPatient'
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { loading, user, role } = useUser()
+  const { role: urlRole } = useParams()
 
   if (loading) {
     return (
@@ -43,19 +37,26 @@ function ProtectedRoute({ children, allowedRoles }) {
     )
   }
 
-  // Not authenticated
+  //not authenticated
   if (!user) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/auth/login" replace />
   }
 
-  // Role-based access control
+  const expectedRole =
+    role === PATIENT ? 'patient' : role === STAFF ? 'staff' : null
+
+  if (urlRole && urlRole !== expectedRole) {
+    return <Navigate to={`/${expectedRole}/dashboard`} replace />
+  }
+
+  //ole-based access control
   if (allowedRoles && !allowedRoles.includes(role)) {
     if (role === PATIENT) {
-      return <Navigate to="/p/dashboard" replace />
+      return <Navigate to="/patient/dashboard" replace />
     } else if (role === STAFF) {
-      return <Navigate to="/s/dashboard" replace />
+      return <Navigate to="/staff/dashboard" replace />
     }
-    return <Navigate to="/login" replace />
+    return <Navigate to="/auth/login" replace />
   }
 
   return children
@@ -64,45 +65,28 @@ function ProtectedRoute({ children, allowedRoles }) {
 function App() {
   const location = useLocation()
 
-  // Hide navbar for login and register pages
-  const hideNavbar = ['/login', '/register'].includes(location.pathname)
+  //hide navbar for login and register pages
+  const hideNavbar = ['/auth/login', '/register'].includes(location.pathname)
 
   return (
     <>
       {!hideNavbar && <Navbar />}
 
       <Routes>
-        {/* PUBLIC ROUTES */}
-        <Route path="/login" element={<Login />} />
+        <Route path="/auth/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* PATIENT PROTECTED ROUTES */}
         <Route
-          path="/p/onboarding/verify-email"
+          path="/:role/dashboard"
           element={
-            <ProtectedRoute allowedRoles={[PATIENT]}>
-              <VerifyEmail />
+            <ProtectedRoute allowedRoles={[PATIENT, STAFF]}>
+              <RoleDashboard />
             </ProtectedRoute>
           }
         />
+
         <Route
-          path="/p/onboarding/set-password"
-          element={
-            <ProtectedRoute allowedRoles={[PATIENT]}>
-              <SetPassword />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/p/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={[PATIENT]}>
-              <PatientDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/p/my-profile"
+          path="/:role/my-profile"
           element={
             <ProtectedRoute allowedRoles={[PATIENT]}>
               <PatientProfile />
@@ -110,7 +94,7 @@ function App() {
           }
         />
         <Route
-          path="/p/make-appointment"
+          path="/:role/make-appointment"
           element={
             <ProtectedRoute allowedRoles={[PATIENT]}>
               <PatientMakeAppointment />
@@ -118,54 +102,40 @@ function App() {
           }
         />
 
-        {/* STAFF PROTECTED ROUTES */}
         <Route
-          path="/s/dashboard"
+          path="/:role/patient/:id/profile"
           element={
             <ProtectedRoute allowedRoles={[STAFF]}>
-              <StaffDashboard />
+              <StaffPatientProfile />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/s/patient/profile"
+          path="/:role/patient/register"
           element={
             <ProtectedRoute allowedRoles={[STAFF]}>
-              <StaffPatients />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/s/patient/register"
-          element={
-            <ProtectedRoute allowedRoles={[STAFF]}>
-              <StaffAppointments />
+              <StaffRegisterPatient />
             </ProtectedRoute>
           }
         />
 
         {/* FALLBACK */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
-
-        {/* TEST ROUTES (Optional: Remove in production) */}
-        <Route
-          path="/test-demo/firebase-database"
-          element={<TestFirebaseDatabase />}
-        />
-        <Route
-          path="/test-demo/firebase-storage"
-          element={<TestFirebaseStorage />}
-        />
-        <Route
-          path="/test-demo/firebase-authentication"
-          element={<TestFirebaseAuthentication />}
-        />
-        <Route path="/test-demo/send-email" element={<SendEmail />} />
-        <Route path="/test-demo/register" element={<MockRegister />} />
-        <Route path="/test-demo/login" element={<MockLogin />} />
+        <Route path="*" element={<Navigate to="/auth/login" replace />} />
       </Routes>
     </>
   )
+}
+
+function RoleDashboard() {
+  const { role } = useUser()
+
+  if (role === PATIENT) {
+    return <PatientDashboard />
+  } else if (role === STAFF) {
+    return <StaffDashboard />
+  }
+
+  return <Navigate to="/auth/login" replace />
 }
 
 export default App

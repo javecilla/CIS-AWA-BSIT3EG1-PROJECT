@@ -1,5 +1,3 @@
-import { NavLink } from 'react-router-dom'
-
 export default function FollowUpConfirmation({ formData, handleRedirect }) {
   return (
     <div className="followup-confirmation appointment-container">
@@ -13,9 +11,6 @@ export default function FollowUpConfirmation({ formData, handleRedirect }) {
                 Use this module to submit an appointment
               </p>
             </div>
-            <NavLink to="/dashboard" className="btn btn-primary px-4 py-2">
-              Back to Dashboard
-            </NavLink>
           </div>
           {/*Progresss Trcaker*/}
           <div className="d-flex justify-content-center align-items-center mb-5 gap-2">

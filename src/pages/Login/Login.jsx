@@ -14,6 +14,7 @@ import { auth, db } from '@/libs/firebase.js'
 import { PATIENT, STAFF } from '@/constants/user-roles'
 import loginImage from '@/assets/images/login-image.png'
 import logoClinic from '@/assets/images/logo-clinic.png'
+import { useRoleNavigation } from '@/hooks/useRoleNavigation'
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -45,7 +46,8 @@ function Login() {
   const MAX_ATTEMPTS = 3
   const LOCKOUT_DURATION = 60
 
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
+  const { navigate } = useRoleNavigation()
 
   //check for existing login lockout
   useEffect(() => {
@@ -113,10 +115,9 @@ function Login() {
             setFailedAttempts(0)
             setIsLocked(false)
 
-            if (userData.role === PATIENT) {
-              navigate('/p/dashboard')
-            } else if (userData.role === STAFF) {
-              navigate('/s/dashboard')
+            if (userData.role) {
+              // navigate(`/${userData.role}/dashboard`)
+              navigate('/dashboard')
             } else {
               //role not found
               setGeneralError('User role not found. Please contact support.')
