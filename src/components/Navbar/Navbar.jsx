@@ -13,7 +13,7 @@ function Navbar() {
     setIsLoggingOut(true)
     try {
       await signOut(auth)
-      navigate('/login')
+      navigate('/auth/login')
     } catch (error) {
       console.error('Logout failed:', error)
     } finally {

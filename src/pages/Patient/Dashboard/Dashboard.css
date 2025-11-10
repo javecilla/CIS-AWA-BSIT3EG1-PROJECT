@@ -57,9 +57,9 @@
 }
 
 .consultation-title {
-  color: var(--color-primary);
+  color: var(--color-primary) !important;
   font-size: 30px;
-  font-weight: 700;
+  font-weight: 700 !important;
   line-height: 1.15;
   margin: 0;
 }

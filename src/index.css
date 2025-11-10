@@ -1,23 +1,19 @@
 @charset "UTF-8";
 
 :root {
-  /* Brand Colors - Primary Palette */
   --color-primary: #03045e;
   --color-primary-light: #0077b6;
   --color-primary-medium: #00b4d8;
   --color-accent: #90e0ef;
   --color-accent-light: #caf0f8;
 
-  /* Typography */
   --font-primary: 'Roboto', sans-serif;
   --font-secondary: 'Space Grotesk', sans-serif;
 
-  /* Font Weights */
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-bold: 700;
 
-  /* Use Cases */
   --heading-font: var(--font-secondary);
   --body-font: var(--font-primary);
 }
@@ -117,6 +113,23 @@ input[type='radio']:checked {
   color: white;
 }
 
+.btn-secondary {
+  background-color: var(--color-primary-light);
+  color: white;
+  border: none;
+}
+.btn-secondary:disabled {
+  background-color: var(--color-primary-light);
+  color: #e0e0e0;
+}
+.btn-secondary:focus {
+  background-color: var(--color-primary-light);
+  color: #e0e0e0;
+}
+.btn-secondary:hover {
+  color: white;
+}
+
 .btn-outline-primary {
   border: 2px solid var(--color-primary);
   color: var(--color-primary);
@@ -157,7 +170,4 @@ input[type='radio']:checked {
   border: 1.5px solid var(--color-primary-light);
   color: var(--color-primary-light);
   opacity: 0.8;
-}
-.text-description {
-  font-size: 0.75rem;
 }

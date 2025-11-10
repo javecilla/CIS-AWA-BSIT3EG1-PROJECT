@@ -3,19 +3,19 @@
   margin-top: -130px;
 } */
 .select-reason {
-  margin-top: -270px;
+  margin-top: -270px !important;
 }
 .appointment-form {
-  margin-top: -65px;
+  margin-top: -65px !important;
 }
 .appointment-confirmation {
-  margin-top: -180px;
+  margin-top: -180px !important;
 }
 .followup-form {
-  margin-top: -65px;
+  margin-top: -65px !important;
 }
 .followup-confirmation {
-  margin-top: -180px;
+  margin-top: -180px !important;
 }
 
 .appointment-container {

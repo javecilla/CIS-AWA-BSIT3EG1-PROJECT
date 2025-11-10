@@ -248,12 +248,24 @@ export default function personalInfoStep({
               type="date"
               name="dateOfBirth"
               className={`form-control mt-1 ${
-                showErrors && formData.dateOfBirth === '' ? 'is-invalid' : ''
+                showErrors &&
+                (!formData.dateOfBirth ||
+                  (formData.dateOfBirth &&
+                    new Date(formData.dateOfBirth) > new Date()))
+                  ? 'is-invalid'
+                  : ''
               }`}
               value={formData.dateOfBirth}
               onChange={handleChange}
+              // max={new Date().toISOString().split('T')[0]}
             />
-            <div className="invalid-feedback">Date of Birth is required.</div>
+            <div className="invalid-feedback">
+              {showErrors &&
+              formData.dateOfBirth &&
+              new Date(formData.dateOfBirth) > new Date()
+                ? 'Date of birth cannot be a future date.'
+                : 'Date of Birth is required.'}
+            </div>
           </div>
 
           <div
@@ -479,7 +491,7 @@ export default function personalInfoStep({
 
         <div className="d-flex justify-content-between align-items-center mt-3">
           <p className="m-0">
-            Already have an account? <NavLink to="/login">Login</NavLink>
+            Already have an account? <NavLink to="/auth/login">Login</NavLink>
           </p>
 
           <button className="btn btn-next px-5 py-2 fs-5" onClick={nextStep}>

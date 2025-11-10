@@ -2,8 +2,11 @@ import { NavLink } from 'react-router-dom'
 import DefaultProfile from '@/assets/images/default-profile.png'
 import { formatFullName, maskEmail, maskPhoneNumber } from '@/utils/formatter'
 import './ProfileCard.css'
+import { useRoleNavigation } from '@/hooks/useRoleNavigation'
 
 function ProfileCard({ patientData }) {
+  const { getPath } = useRoleNavigation()
+
   return (
     <div className="profile-card h-100 d-flex flex-column">
       <div className="profile-header">
@@ -27,7 +30,7 @@ function ProfileCard({ patientData }) {
 
           <div className="left-button-wrap mt-auto w-100 d-flex d-md-block justify-content-center justify-content-md-start">
             <NavLink
-              to="/p/my-profile"
+              to={getPath('/my-profile')}
               className="text-white text-decoration-none btn btn-primary custom-btn"
             >
               My Account
@@ -55,7 +58,7 @@ function ProfileCard({ patientData }) {
           <div className="right-button-wrap w-100 d-flex d-md-block justify-content-center justify-content-md-start">
             <button className="btn btn-primary custom-btn">
               <NavLink
-                to="/p/my-profile"
+                to={getPath('/my-profile')}
                 className="text-white text-decoration-none"
               >
                 View my full Profile

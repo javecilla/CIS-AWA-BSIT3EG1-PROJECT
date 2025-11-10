@@ -1,6 +1,7 @@
 import React from 'react'
 import { useLocation, Link } from 'react-router-dom'
 import './BreadCrumb.css'
+import { PATIENT, STAFF } from '@/constants/user-roles'
 
 function formatLabel(segment) {
   return segment
@@ -13,7 +14,7 @@ export default function BreadCrumb() {
   const { pathname } = useLocation()
   let segments = pathname.split('/').filter(Boolean)
 
-  const ignoredSegments = ['p']
+  const ignoredSegments = [PATIENT, STAFF]
   segments = segments.filter((seg) => !ignoredSegments.includes(seg))
 
   // console.log('Breadcrumb segments:', segments)

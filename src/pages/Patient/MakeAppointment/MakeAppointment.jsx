@@ -9,6 +9,7 @@ import FollowUpForm from '@/components/AppointmentSteps/FollowUpForm'
 import FollowUpConfirmation from '@/components/AppointmentSteps/FollowUpConfirmation'
 import AppointmentConfirmation from '@/components/AppointmentSteps/AppointmentConfirmation'
 import Header from '@/components/Header'
+import { useRoleNavigation } from '@/hooks/useRoleNavigation'
 
 const getInitialFormData = () => {
   const savedFormData = localStorage.getItem('patientMakeAppointmentFormData')
@@ -93,7 +94,8 @@ function MakeAppointment() {
   const [generalError, setGeneralError] = useState('')
   const [generatedAppointmentId, setGeneratedAppointmentId] = useState('')
 
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
+  const { navigate } = useRoleNavigation()
   const isInitialMount = useRef(true)
 
   const [formData, setFormData] = useState(getInitialFormData())
@@ -370,7 +372,7 @@ function MakeAppointment() {
   const handleRedirect = () => {
     localStorage.removeItem('patientMakeAppointmentFormData')
     localStorage.removeItem('patientMakeAppointmentStep')
-    navigate('/p/dashboard')
+    navigate('/dashboard')
   }
 
   const getFieldErrors = () => {

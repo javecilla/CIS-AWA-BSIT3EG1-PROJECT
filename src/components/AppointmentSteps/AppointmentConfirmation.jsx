@@ -12,9 +12,6 @@ export default function AppointmentConfirmation({ formData, handleRedirect }) {
                   Use this module to submit an appointment
                 </p>
               </div>
-              {/* <NavLink to="/dashboard" className="btn btn-primary px-4 py-2">
-                Back to Dashboard
-              </NavLink> */}
             </div>
             {/*Progresss Trcaker*/}
             <div className="d-flex justify-content-center align-items-center mb-5 gap-2">

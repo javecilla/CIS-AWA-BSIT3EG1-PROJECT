@@ -3,10 +3,12 @@ import Header from '@/components/Header'
 import AccountInformation from '@/components/AccountInformation'
 import PersonalInformation from '@/components/PersonalInformation'
 import { NavLink } from 'react-router-dom'
+import { useRoleNavigation } from '@/hooks/useRoleNavigation'
 import { useUser } from '@/contexts/UserContext'
 import UserImageProfile from '@/components/UserImageProfile'
 
 function Profile() {
+  const { getPath } = useRoleNavigation()
   const { userData, loading } = useUser()
   // console.log('User Data in Profile:', userData)
 
@@ -44,7 +46,7 @@ function Profile() {
               </p>
             </div>
             <NavLink
-              to="/p/dashboard"
+              to={getPath('/dashboard')}
               className="btn btn-primary my-profile-back-btn"
             >
               Back to Dashboard

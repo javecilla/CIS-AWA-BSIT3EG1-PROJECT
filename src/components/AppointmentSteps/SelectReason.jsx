@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { useRoleNavigation } from '@/hooks/useRoleNavigation'
 
 export default function SelectReason({
   formData,
@@ -6,6 +7,8 @@ export default function SelectReason({
   nextStep,
   generalError
 }) {
+  const { getPath } = useRoleNavigation()
+
   return (
     <div className="select-reason appointment-container">
       <div className="row align-items-start">
@@ -18,7 +21,10 @@ export default function SelectReason({
                 Use this module to submit an appointment
               </p>
             </div>
-            <NavLink to="/dashboard" className="btn btn-primary px-4 py-2">
+            <NavLink
+              to={getPath('/dashboard')}
+              className="btn btn-primary px-4 py-2"
+            >
               Back to Dashboard
             </NavLink>
           </div>
