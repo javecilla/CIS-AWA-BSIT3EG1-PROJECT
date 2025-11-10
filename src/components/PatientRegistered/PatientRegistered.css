@@ -1,0 +1,20 @@
+.patient-container {
+  position: relative;
+}
+
+.consultation-text {
+  padding: 20px;
+}
+
+i {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 24px;
+  z-index: 1000;
+}
+
+.consultation-title {
+  color: #000;
+  font-weight: var(--font-weight-normal);
+}
