@@ -189,19 +189,19 @@ function PatientRegisteredList() {
 
   return (
     <>
-      <div className="appointment-top-section d-flex flex-row justify-content-between flex-wrap">
-        <div className="appointment-history">
+      <div className="patient-registered-list d-flex flex-row justify-content-between flex-wrap">
+        <div className="patient-list">
           <h3>Patient Registered List</h3>
           <p>Showing all patient appointments for Pandi</p>
         </div>
-        <div className="download-records mt-3 mt-md-0">
+        <div className="register-walk-in mt-3 mt-md-0">
           <button className="btn btn-primary custom-btn">
             Register Walk-in Patient
           </button>
         </div>
       </div>
 
-      <div className="appointment-table">
+      <div className="patient-registered-list-table">
         <div className="table-responsive">
           <table className="table">
             <thead>
@@ -297,7 +297,7 @@ function PatientRegisteredList() {
       </div>
 
       {filteredAppointments.length > 0 && (
-        <div className="appointment-bottom-section d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+        <div className="patient-bottom-section d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
           <div className="record-text text-center text-md-start">
             <p>
               Showing {indexOfFirstRecord + 1} to{' '}
@@ -305,7 +305,7 @@ function PatientRegisteredList() {
               {filteredAppointments.length} records
             </p>
           </div>
-          <div className="appointment-button-container d-flex gap-3">
+          <div className="patient-button-container d-flex gap-3">
             <button
               className="btn btn-outline-primary custom-btn-outline"
               onClick={handlePreviousPage}

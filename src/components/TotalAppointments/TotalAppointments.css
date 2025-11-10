@@ -2,10 +2,19 @@
   position: relative;
 }
 
+.top-card-text {
+  padding: 20px;
+}
+
 .total-appointment-container i {
   position: absolute;
   top: 15px;
   right: 20px;
   font-size: 24px;
   z-index: 1000;
+}
+
+.top-card-title {
+  color: #000;
+  font-weight: var(--font-weight-normal);
 }

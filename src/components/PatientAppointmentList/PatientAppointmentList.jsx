@@ -189,8 +189,8 @@ function AppointmentHistory() {
 
   return (
     <>
-      <div className="appointment-top-section d-flex flex-row justify-content-between flex-wrap">
-        <div className="appointment-history">
+      <div className="patient-appointment-list d-flex flex-row justify-content-between flex-wrap">
+        <div className="patient-list">
           <h3>Patient Appointment List</h3>
           <p>Showing all patient appointments for Pandi</p>
         </div>
@@ -213,7 +213,7 @@ function AppointmentHistory() {
         </button>
       </div>
 
-      <div className="appointment-table">
+      <div className="patient-appointment-list-table">
         <div className="table-responsive">
           <table className="table">
             <thead>
@@ -309,7 +309,7 @@ function AppointmentHistory() {
       </div>
 
       {filteredAppointments.length > 0 && (
-        <div className="appointment-bottom-section d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+        <div className="patient-bottom-section d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
           <div className="record-text text-center text-md-start">
             <p>
               Showing {indexOfFirstRecord + 1} to{' '}
@@ -317,7 +317,7 @@ function AppointmentHistory() {
               {filteredAppointments.length} records
             </p>
           </div>
-          <div className="appointment-button-container d-flex gap-3">
+          <div className="patient-button-container d-flex gap-3">
             <button
               className="btn btn-outline-primary custom-btn-outline"
               onClick={handlePreviousPage}
