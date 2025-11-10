@@ -1,13 +1,4 @@
-.appointment-container {
-  background-color: var(--color-accent);
-  border: 0.5px solid var(--color-primary);
-  border-radius: 10px;
-  margin: 0 auto 40px auto;
-  padding: 20px;
-  box-sizing: border-box;
-}
-
-.appointment-table {
+.patient-appointment-list-table {
   border-radius: 18px;
   background-color: white;
   margin: 10px 0;

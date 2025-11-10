@@ -2,7 +2,7 @@
   position: relative;
 }
 
-.consultation-text {
+.top-card-text {
   padding: 20px;
 }
 
@@ -14,7 +14,7 @@
   z-index: 1000;
 }
 
-.consultation-title {
+.top-card-title {
   color: #000;
   font-weight: var(--font-weight-normal);
 }
