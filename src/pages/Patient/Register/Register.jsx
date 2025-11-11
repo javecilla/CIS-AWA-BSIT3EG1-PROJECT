@@ -1,3 +1,5 @@
+// patient side registration
+// pages/Patient/Register.jsx
 import { Link, useNavigate } from 'react-router-dom'
 import './Register.css'
 import { useState, useEffect, useRef } from 'react'

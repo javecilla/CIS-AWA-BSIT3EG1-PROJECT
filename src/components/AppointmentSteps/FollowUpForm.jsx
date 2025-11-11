@@ -1,4 +1,7 @@
 import { NavLink } from 'react-router-dom'
+import PatientDetailsForm from '@/components/PatientDetailsForm'
+import { useUser } from '@/contexts/UserContext'
+import { STAFF } from '@/constants/user-roles'
 
 export default function FollowUpForm({
   formData,
@@ -7,8 +10,17 @@ export default function FollowUpForm({
   prevStep,
   errors,
   generalError,
-  isSubmitting
+  isSubmitting,
+  selectedPatientUID,
+  hasPatientRecord,
+  onPatientSelect,
+  onHasPatientRecordChange,
+  handleBlur,
+  emailFieldError,
+  emailInputRef,
+  showErrors
 }) {
+  const { role } = useUser()
   return (
     <div className="followup-form appointment-container">
       <div className="row align-items-start">
@@ -50,9 +62,6 @@ export default function FollowUpForm({
             </div>
           </div>
 
-          {/*BOOKING DETAILS*/}
-          <h6 className="fw-bold mb-3">BOOKING DETAILS</h6>
-
           {/* General Error Alert */}
           {generalError && (
             <div
@@ -64,6 +73,28 @@ export default function FollowUpForm({
             </div>
           )}
 
+          {/*Patient Details*/}
+          {role === STAFF && (
+            <>
+              <h6 className="fw-bold mb-3">PATIENT DETAILS</h6>
+              <PatientDetailsForm
+                formData={formData}
+                handleChange={handleChange}
+                showErrors={showErrors}
+                errors={errors} // Pass field-specific errors
+                generalError={generalError}
+                emailFieldError={emailFieldError}
+                emailInputRef={emailInputRef}
+                onPatientSelect={onPatientSelect}
+                hasPatientRecord={hasPatientRecord}
+                onHasPatientRecordChange={onHasPatientRecordChange}
+                handleBlur={handleBlur}
+              />
+            </>
+          )}
+
+          {/*BOOKING DETAILS*/}
+          <h6 className="fw-bold mb-3">BOOKING DETAILS</h6>
           {/*Select a Branch*/}
           <div className="mb-4">
             <label className="fw-medium">Select a Branch:</label>

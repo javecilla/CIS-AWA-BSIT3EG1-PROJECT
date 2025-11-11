@@ -18,6 +18,7 @@ export default function BreadCrumb() {
 
   segments = segments.map((seg) => {
     if (/^[A-Za-z0-9]{15,}$/.test(seg)) return 'patient'
+    if (seg.startsWith('walkin_')) return 'patient'
     return seg
   })
 
@@ -34,7 +35,7 @@ export default function BreadCrumb() {
 
         {segments.map((segment, index) => {
           const isLast = index === segments.length - 1
-          const label = formatLabel(segment)
+          const label = segment === 'patient' ? 'Patient' : formatLabel(segment)
 
           return (
             <li

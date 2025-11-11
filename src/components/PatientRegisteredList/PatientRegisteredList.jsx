@@ -4,6 +4,7 @@ import { db } from '@/libs/firebase.js'
 import './PatientRegisteredList.css'
 import { formatFullName } from '@/utils/formatter.js'
 import { useRoleNavigation } from '@/hooks/useRoleNavigation'
+import { NavLink } from 'react-router-dom'
 
 function PatientRegisteredList() {
   const [patients, setPatients] = useState([])
@@ -11,6 +12,7 @@ function PatientRegisteredList() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [patientTypeFilter, setPatientTypeFilter] = useState('all')
 
   const [alertMessage, setAlertMessage] = useState('')
   const [alertType, setAlertType] = useState('')
@@ -18,7 +20,7 @@ function PatientRegisteredList() {
   const [currentPage, setCurrentPage] = useState(1)
   const [recordsPerPage] = useState(5)
 
-  const { navigate } = useRoleNavigation()
+  const { navigate, getPath } = useRoleNavigation()
 
   const showAlert = (message, type) => {
     setAlertMessage(message)
@@ -38,7 +40,7 @@ function PatientRegisteredList() {
 
   useEffect(() => {
     handleSearch()
-  }, [searchQuery, patients])
+  }, [searchQuery, patients, patientTypeFilter])
 
   const fetchPatients = async () => {
     setLoading(true)
@@ -54,8 +56,12 @@ function PatientRegisteredList() {
         }))
 
         const patientList = allUsers.filter((user) => user.role === 'patient')
-        // console.log(patientList[0].fullName)
-        // console.log(formatFullName(patientList[0].fullName))
+
+        patientList.sort((a, b) => {
+          const dateA = new Date(a.createdAt || '1970-01-01T00:00:00.000Z')
+          const dateB = new Date(b.createdAt || '1970-01-01T00:00:00.000Z')
+          return dateB - dateA
+        })
 
         setPatients(patientList)
         setFilteredPatients(patientList)
@@ -73,13 +79,19 @@ function PatientRegisteredList() {
 
   const handleSearch = () => {
     const query = searchQuery.toLowerCase()
-    if (!query) {
-      setFilteredPatients(patients)
-      setCurrentPage(1)
-      return
-    }
 
-    const filtered = patients.filter((patient) => {
+    let filtered = patients.filter((patient) => {
+      if (
+        patientTypeFilter === 'walkin' &&
+        !patient.uid.startsWith('walkin_')
+      ) {
+        return false
+      }
+      if (patientTypeFilter === 'online' && patient.uid.startsWith('walkin_')) {
+        return false
+      }
+      if (!query) return true
+
       const name = formatFullName(patient.fullName).toLowerCase()
       const id = patient.patientId ? patient.patientId.toLowerCase() : ''
       const email = patient.email ? patient.email.toLowerCase() : ''
@@ -168,16 +180,12 @@ function PatientRegisteredList() {
           <p>Showing all registered patient records</p>
         </div>
         <div className="register-walk-in mt-3 mt-md-0">
-          <button
+          <NavLink
             className="btn btn-primary custom-btn"
-            onClick={() =>
-              alert(
-                '//TODO: navigate to /patient/register page and implement functionality'
-              )
-            }
+            to={getPath('/patient/register')}
           >
             Register Walk-in Patient
-          </button>
+          </NavLink>
         </div>
       </div>
 
@@ -190,13 +198,43 @@ function PatientRegisteredList() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <button
-          className="btn btn-primary"
-          type="button"
-          onClick={handleSearch}
-        >
-          Search
-        </button>
+        {/*
+         */}
+        <span className="d-flex flex-wrap gap-2 align-items-center">
+          <div
+            className="btn-group"
+            role="group"
+            aria-label="Patient type filter"
+          >
+            <button
+              type="button"
+              className={`btn btn-outline-primary ${
+                patientTypeFilter === 'all' ? 'active' : ''
+              }`}
+              onClick={() => setPatientTypeFilter('all')}
+            >
+              <i className="fa-solid fa-users me-1"></i>All Patients
+            </button>
+            <button
+              type="button"
+              className={`btn btn-outline-primary ${
+                patientTypeFilter === 'walkin' ? 'active' : ''
+              }`}
+              onClick={() => setPatientTypeFilter('walkin')}
+            >
+              <i className="fa-solid fa-person-walking me-1"></i>Walk-in
+            </button>
+            <button
+              type="button"
+              className={`btn btn-outline-primary ${
+                patientTypeFilter === 'online' ? 'active' : ''
+              }`}
+              onClick={() => setPatientTypeFilter('online')}
+            >
+              <i className="fa-solid fa-globe me-1"></i>Online
+            </button>
+          </div>
+        </span>
       </div>
 
       {alertMessage && alertType && (
@@ -236,6 +274,19 @@ function PatientRegisteredList() {
                         {formatFullName(patient.fullName)}
                       </div>
                       <small className="text-muted">{patient.patientId}</small>
+                      <div className="mt-1">
+                        <span
+                          className={`badge ${
+                            patient.uid.startsWith('walkin_')
+                              ? 'bg-warning text-dark'
+                              : 'bg-info'
+                          }`}
+                        >
+                          {patient.uid.startsWith('walkin_')
+                            ? 'Walk-in'
+                            : 'Online'}
+                        </span>
+                      </div>
                     </td>
                     <td>{patient.email}</td>
                     <td>{patient.contactInfo?.mobileNumber || 'N/A'}</td>

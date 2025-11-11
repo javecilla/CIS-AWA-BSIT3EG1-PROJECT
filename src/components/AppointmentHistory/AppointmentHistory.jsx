@@ -72,9 +72,15 @@ function AppointmentHistory({ patientUID = null, action = '' }) {
           ...data[key]
         }))
 
+        // appointmentsArray.sort((a, b) => {
+        //   const dateA = new Date(a.appointmentDate)
+        //   const dateB = new Date(b.appointmentDate)
+        //   return dateB - dateA
+        // })
+
         appointmentsArray.sort((a, b) => {
-          const dateA = new Date(a.appointmentDate)
-          const dateB = new Date(b.appointmentDate)
+          const dateA = new Date(a.createdAt)
+          const dateB = new Date(b.createdAt)
           return dateB - dateA
         })
 
@@ -117,7 +123,7 @@ function AppointmentHistory({ patientUID = null, action = '' }) {
   }
 
   const getStatusBadgeClass = (status) => {
-    switch (status.trim().toLowerCase()) {
+    switch (status.toLowerCase()) {
       case 'pending':
         return 'text-bg-warning'
       case 'confirmed':
@@ -125,9 +131,11 @@ function AppointmentHistory({ patientUID = null, action = '' }) {
       case 'completed':
         return 'text-bg-success'
       case 'cancelled':
+        return 'text-bg-secondary'
+      case 'no-show':
         return 'text-bg-danger'
       default:
-        return 'text-bg-secondary'
+        return 'text-bg-light'
     }
   }
 

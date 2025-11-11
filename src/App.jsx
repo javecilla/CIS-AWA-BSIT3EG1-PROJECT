@@ -65,7 +65,6 @@ function ProtectedRoute({ children, allowedRoles }) {
 function App() {
   const location = useLocation()
 
-  //hide navbar for login and register pages
   const hideNavbar = ['/auth/login', '/register'].includes(location.pathname)
 
   return (

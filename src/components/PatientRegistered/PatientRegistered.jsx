@@ -7,7 +7,9 @@ function PatientRegistered() {
   const [counts, setCounts] = useState({
     total: 0,
     male: 0,
-    female: 0
+    female: 0,
+    walkIn: 0,
+    online: 0
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -19,7 +21,9 @@ function PatientRegistered() {
       usersRef,
       (snapshot) => {
         if (snapshot.exists()) {
-          const allUsers = Object.values(snapshot.val())
+          const usersData = snapshot.val()
+          const allUserIds = Object.keys(usersData)
+          const allUsers = Object.values(usersData)
 
           const patients = allUsers.filter((user) => user.role === 'patient')
 
@@ -35,16 +39,28 @@ function PatientRegistered() {
 
               return acc
             },
-            { male: 0, female: 0 }
+            { male: 0, female: 0, walkIn: 0, online: 0 }
           )
+
+          allUserIds.forEach((userId) => {
+            if (usersData[userId].role === 'patient') {
+              if (userId.startsWith('walkin_')) {
+                stats.walkIn += 1
+              } else {
+                stats.online += 1
+              }
+            }
+          })
 
           setCounts({
             total: totalPatients,
             male: stats.male,
-            female: stats.female
+            female: stats.female,
+            walkIn: stats.walkIn,
+            online: stats.online
           })
         } else {
-          setCounts({ total: 0, male: 0, female: 0 })
+          setCounts({ total: 0, male: 0, female: 0, walkIn: 0, online: 0 })
         }
         setLoading(false)
       },
@@ -73,8 +89,8 @@ function PatientRegistered() {
         <h2>{counts.total}</h2>
         <p className="top-card-description mb-3">Male: {counts.male}</p>
         <p className="top-card-description mb-3">Female: {counts.female}</p>
-        <p className="top-card-description mb-3"></p>
-        <p className="top-card-description mb-3"></p>
+        <p className="top-card-description mb-3">Walk-in: {counts.walkIn}</p>
+        <p className="top-card-description mb-3">Online: {counts.online}</p>
       </>
     )
   }
