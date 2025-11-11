@@ -23,15 +23,12 @@ const getInitialFormData = () => {
   }
 
   return {
-    // Step 1 - Reason selection
     appointmentReason: '', // 'newBite' or 'followUp'
 
-    // Common fields for both paths
     branch: '',
     appointmentDate: '',
     timeSlot: '',
 
-    // New Bite specific fields
     incidentDate: '',
     exposureBite: false,
     exposureLick: false,
@@ -43,13 +40,11 @@ const getInitialFormData = () => {
     biteLocation: '',
     animalVaccinationStatus: '',
 
-    // Medical history
     hasAllergies: '',
     allergies: '',
     hasReceivedVaccine: '',
     lastShotDate: '',
 
-    // Follow-up specific fields
     primaryReason: '',
     newConditions: '',
     confirmPolicy: false

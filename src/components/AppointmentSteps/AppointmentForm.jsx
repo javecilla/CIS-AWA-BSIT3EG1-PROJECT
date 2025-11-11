@@ -1,3 +1,7 @@
+import PatientDetailsForm from '@/components/PatientDetailsForm'
+import { useUser } from '@/contexts/UserContext'
+import { STAFF } from '@/constants/user-roles'
+
 export default function AppointmentForm({
   formData,
   handleChange,
@@ -5,8 +9,17 @@ export default function AppointmentForm({
   prevStep,
   errors,
   generalError,
-  isSubmitting
+  isSubmitting,
+  selectedPatientUID,
+  hasPatientRecord,
+  onPatientSelect,
+  onHasPatientRecordChange,
+  handleBlur,
+  emailFieldError,
+  emailInputRef,
+  showErrors
 }) {
+  const { role } = useUser()
   return (
     <div className="appointment-form appointment-container">
       <div className="row align-items-start">
@@ -43,9 +56,6 @@ export default function AppointmentForm({
             </div>
           </div>
 
-          {/*Appointment Details*/}
-          <h6 className="fw-bold mb-3">APPOINTMENT DETAILS</h6>
-
           {/* General Error Alert */}
           {generalError && (
             <div
@@ -57,6 +67,29 @@ export default function AppointmentForm({
             </div>
           )}
 
+          {/*Patient Details*/}
+          {/* check user role only show if user role is staff */}
+          {role === STAFF && (
+            <>
+              <h6 className="fw-bold mb-3">PATIENT DETAILS</h6>
+              <PatientDetailsForm
+                formData={formData}
+                handleChange={handleChange}
+                showErrors={showErrors}
+                errors={errors} // Pass field-specific errors
+                generalError={generalError}
+                emailFieldError={emailFieldError}
+                emailInputRef={emailInputRef}
+                onPatientSelect={onPatientSelect}
+                hasPatientRecord={hasPatientRecord}
+                onHasPatientRecordChange={onHasPatientRecordChange}
+                handleBlur={handleBlur}
+              />
+            </>
+          )}
+
+          {/*Appointment Details*/}
+          <h6 className="fw-bold mb-3">APPOINTMENT DETAILS</h6>
           <div className="mb-4">
             <label className="fw-medium">Select a Branch:</label>
             <small className="text-muted d-block mb-1 text-description">
@@ -192,7 +225,9 @@ export default function AppointmentForm({
                     <div className="col-md-6" key={name}>
                       <div className="form-check mb-2">
                         <input
-                          className="form-check-input"
+                          className={`form-check-input ${
+                            errors.exposure ? 'is-invalid' : ''
+                          }`}
                           type="checkbox"
                           name={name}
                           checked={formData[name]}
@@ -311,7 +346,9 @@ export default function AppointmentForm({
               >
                 <div className="form-check">
                   <input
-                    className="form-check-input"
+                    className={`form-check-input ${
+                      errors.hasAllergies ? 'is-invalid' : ''
+                    }`}
                     type="radio"
                     name="hasAllergies"
                     value="yes"
@@ -323,7 +360,9 @@ export default function AppointmentForm({
                 </div>
                 <div className="form-check">
                   <input
-                    className="form-check-input"
+                    className={`form-check-input ${
+                      errors.hasAllergies ? 'is-invalid' : ''
+                    }`}
                     type="radio"
                     name="hasAllergies"
                     value="no"
@@ -355,7 +394,9 @@ export default function AppointmentForm({
               >
                 <div className="form-check">
                   <input
-                    className="form-check-input"
+                    className={`form-check-input ${
+                      errors.hasReceivedVaccine ? 'is-invalid' : ''
+                    }`}
                     type="radio"
                     name="hasReceivedVaccine"
                     value="yes"
@@ -367,7 +408,9 @@ export default function AppointmentForm({
                 </div>
                 <div className="form-check">
                   <input
-                    className="form-check-input"
+                    className={`form-check-input ${
+                      errors.hasReceivedVaccine ? 'is-invalid' : ''
+                    }`}
                     type="radio"
                     name="hasReceivedVaccine"
                     value="no"

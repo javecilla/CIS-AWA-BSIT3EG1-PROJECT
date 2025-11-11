@@ -16,7 +16,7 @@ export function useRoleNavigation() {
     const rolePrefix = getRolePrefix()
 
     if (!rolePrefix) {
-      console.error('No valid role found for navigation')
+      // console.error('No valid role found for navigation')
       return
     }
 

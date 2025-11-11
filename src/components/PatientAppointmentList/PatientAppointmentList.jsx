@@ -45,7 +45,6 @@ function PatientAppointmentList() {
     try {
       setLoading(true)
 
-      // Fetch all appointments from the entire /appointments node
       const appointmentsRef = ref(db, 'appointments')
       const snapshot = await get(appointmentsRef)
 
@@ -53,11 +52,9 @@ function PatientAppointmentList() {
         const allData = snapshot.val()
         const appointmentsArray = []
 
-        // Loop through each user's appointments
         Object.keys(allData).forEach((userId) => {
           const userAppointments = allData[userId]
 
-          // Loop through each appointment for this user
           Object.keys(userAppointments).forEach((appointmentId) => {
             appointmentsArray.push({
               id: appointmentId,
@@ -67,7 +64,6 @@ function PatientAppointmentList() {
           })
         })
 
-        // Fetch user details for each appointment
         const appointmentsWithUserData = await Promise.all(
           appointmentsArray.map(async (appointment) => {
             try {
@@ -101,10 +97,9 @@ function PatientAppointmentList() {
           })
         )
 
-        // Sort by appointment date (newest first)
         appointmentsWithUserData.sort((a, b) => {
-          const dateA = new Date(a.appointmentDate)
-          const dateB = new Date(b.appointmentDate)
+          const dateA = new Date(a.createdAt)
+          const dateB = new Date(b.createdAt)
           return dateB - dateA
         })
 
@@ -178,10 +173,11 @@ function PatientAppointmentList() {
       case 'completed':
         return 'text-bg-success'
       case 'cancelled':
-      case 'canceled':
+        return 'text-bg-secondary'
+      case 'no-show':
         return 'text-bg-danger'
       default:
-        return 'text-bg-secondary'
+        return 'text-bg-light'
     }
   }
 
@@ -290,6 +286,64 @@ function PatientAppointmentList() {
       console.error('Error marking as complete:', error)
       showAlert(
         'Failed to mark appointment as complete. Please try again.',
+        'danger'
+      )
+    }
+  }
+
+  const handleMarkAsNoShow = async (appointment) => {
+    const confirmed = window.confirm(
+      `Mark ${appointment.patientName}'s appointment as no-show?`
+    )
+
+    if (!confirmed) return
+
+    try {
+      const appointmentRef = ref(
+        db,
+        `appointments/${appointment.userId}/${appointment.id}`
+      )
+
+      await update(appointmentRef, {
+        status: 'No-Show',
+        completedAt: new Date().toISOString()
+      })
+
+      await fetchAllAppointments()
+      showAlert('Appointment marked as no-show.', 'success')
+    } catch (error) {
+      console.error('Error marking as no-show:', error)
+      showAlert(
+        'Failed to mark appointment as no-show. Please try again.',
+        'danger'
+      )
+    }
+  }
+
+  const handleMarkAsInConsultation = async (appointment) => {
+    const confirmed = window.confirm(
+      `Mark ${appointment.patientName} as in consultation?`
+    )
+
+    if (!confirmed) return
+
+    try {
+      const appointmentRef = ref(
+        db,
+        `appointments/${appointment.userId}/${appointment.id}`
+      )
+
+      await update(appointmentRef, {
+        status: 'In-Consultation',
+        consultationStartedAt: new Date().toISOString()
+      })
+
+      await fetchAllAppointments()
+      showAlert('Patient consultation started.', 'success')
+    } catch (error) {
+      console.error('Error marking as in consultation:', error)
+      showAlert(
+        'Failed to mark as in consultation. Please try again.',
         'danger'
       )
     }
@@ -423,13 +477,35 @@ function PatientAppointmentList() {
                         </button>
                       )}
 
+                      {appointment.status === 'In-Consultation' && (
+                        <>
+                          <button
+                            className="btn btn-outline-secondary btn-sm"
+                            onClick={() => handleMarkAsComplete(appointment)}
+                          >
+                            Mark as Complete
+                          </button>
+                        </>
+                      )}
+
                       {appointment.status === 'Confirmed' && (
-                        <button
-                          className="btn btn-outline-secondary btn-sm"
-                          onClick={() => handleMarkAsComplete(appointment)}
-                        >
-                          Mark as Complete
-                        </button>
+                        <>
+                          <button
+                            className="btn btn-outline-secondary btn-sm me-2"
+                            onClick={() => handleMarkAsNoShow(appointment)}
+                          >
+                            Mark as No-Show
+                          </button>
+
+                          <button
+                            className="btn btn-outline-secondary btn-sm"
+                            onClick={() =>
+                              handleMarkAsInConsultation(appointment)
+                            }
+                          >
+                            Start Consultation
+                          </button>
+                        </>
                       )}
                     </td>
                   </tr>
