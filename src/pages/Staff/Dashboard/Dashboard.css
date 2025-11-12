@@ -5,7 +5,8 @@
   max-width: 78vw;
 }
 
-.patient-table-container {
+.patient-table-container,
+.appointment-table-container {
   background-color: var(--color-accent);
   border: 0.5px solid var(--color-primary);
   border-radius: 10px;

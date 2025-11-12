@@ -1,8 +1,10 @@
 import { createContext, useState, useContext, useEffect } from 'react'
-import { onAuthStateChanged } from 'firebase/auth'
-import { ref, get, child } from 'firebase/database'
-import { auth, db } from '@/libs/firebase'
 import { formatFullName } from '@/utils/formatter'
+import {
+  onAuthStateChange,
+  getCurrentUser,
+  getUserData
+} from '@/services/authService'
 
 const UserContext = createContext()
 
@@ -12,15 +14,14 @@ export function UserProvider({ children }) {
   const [user, setUser] = useState(null)
   const [role, setRole] = useState(null)
 
+  // re-fetch user profile from centralized auth service
   const refreshUserData = async () => {
-    const firebaseUser = auth.currentUser
+    const firebaseUser = getCurrentUser()
     if (firebaseUser && firebaseUser.emailVerified) {
       try {
-        const userRef = child(ref(db), `users/${firebaseUser.uid}`)
-        const snapshot = await get(userRef)
-
-        if (snapshot.exists()) {
-          const data = snapshot.val()
+        const result = await getUserData(firebaseUser.uid)
+        if (result.success && result.data) {
+          const data = result.data
           setUserData({
             ...data,
             formattedName: formatFullName(data.fullName) || firebaseUser.email,
@@ -28,7 +29,6 @@ export function UserProvider({ children }) {
           })
           setRole(data.role)
         } else {
-          //handle case where user exists in Auth but not RTDB
           setUserData(null)
           setRole(null)
         }
@@ -38,23 +38,20 @@ export function UserProvider({ children }) {
         setRole(null)
       }
     } else {
-      //no user or not verified
       setUserData(null)
       setRole(null)
     }
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onAuthStateChange(async (firebaseUser) => {
       setUser(firebaseUser)
 
       if (firebaseUser && firebaseUser.emailVerified) {
         try {
-          const userRef = child(ref(db), `users/${firebaseUser.uid}`)
-          const snapshot = await get(userRef)
-
-          if (snapshot.exists()) {
-            const data = snapshot.val()
+          const result = await getUserData(firebaseUser.uid)
+          if (result.success && result.data) {
+            const data = result.data
             setUserData({
               ...data,
               formattedName:

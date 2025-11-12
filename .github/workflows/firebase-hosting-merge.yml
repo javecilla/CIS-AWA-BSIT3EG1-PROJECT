@@ -18,11 +18,21 @@ jobs:
         with:
           node-version: "20"
 
-      # Step 3: Install all Node.js dependencies
+      # Step 3: Install Firebase CLI
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      # Step 4: Install all Node.js dependencies
       - name: Install Dependencies
         run: npm ci
 
-      # Step 4: Build the React Application
+      # Step 5: Install Functions Dependencies
+      - name: Install Functions Dependencies
+        run: |
+          cd functions
+          npm ci
+
+      # Step 6: Build the React Application
       - name: Build Application
         run: npm run build
         env:
@@ -43,7 +53,14 @@ jobs:
           VITE_EMAILJS_PRIVATE_API_KEY: ${{ secrets.VITE_EMAILJS_PRIVATE_API_KEY }}
           VITE_EMAILJS_SENDER_MAIL: ${{ secrets.VITE_EMAILJS_SENDER_MAIL }}
 
-      # Step 5: Deploy to Firebase Hosting (Live Channel)
+      # Step 7: Deploy Firebase Functions
+      - name: Deploy Firebase Functions
+        run: |
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" > $HOME/firebase-service-account.json
+          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/firebase-service-account.json
+          firebase deploy --only functions --non-interactive --project cis-awa-bsit3eg1-project
+
+      # Step 8: Deploy to Firebase Hosting (Live Channel)
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

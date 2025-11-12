@@ -1,81 +1,83 @@
-// patient side registration
-// pages/Patient/Register.jsx
-import { Link, useNavigate } from 'react-router-dom'
-import './Register.css'
+import { useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
-import PersonalInfo from '@/components/Steps/PersonalInfo'
-import ContactInfo from '@/components/Steps/ContactInfo'
-import Finished from '@/components/Steps/Finished'
-import { ref, set } from 'firebase/database'
+
+import './Register.css'
+
+import PersonalInfo from '@/components/PatientRegister/PersonalInfo'
+import ContactInfo from '@/components/PatientRegister/ContactInfo'
+import Finished from '@/components/PatientRegister/Finished'
+import Alert from '@/components/Alert'
+
+import { registerPatient, checkEmailExists } from '@/services/authService'
+
 import {
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-  signOut
-} from 'firebase/auth'
-import { auth, db } from '@/libs/firebase.js'
+  loadFormData,
+  saveFormData,
+  clearFormData,
+  loadCurrentStep,
+  saveCurrentStep,
+  hasFormData,
+  buildPatientData
+} from '@/utils/patient-registration'
+import { generatePatientId, generatePassword } from '@/utils/generator'
+import {
+  validatePersonalInformation,
+  validateContactInformation
+} from '@/utils/form-validation'
+
+import {
+  INITIAL_FORM_DATA,
+  STORAGE_KEYS,
+  STEP1_DATA_FIELDS
+} from '@/constants/form-fields'
+import { EMAIL_REGEX } from '@/constants/regex-patterns'
 import { PATIENT } from '@/constants/user-roles'
+import {
+  getFirebaseErrorMessage,
+  EMAIL_ALREADY_IN_USE_CODE,
+  INVALID_EMAIL_CODE,
+  REGISTRATION_ERRORS,
+  FORM_MESSAGES
+} from '@/constants/error-messages'
 
-const getInitialFormData = () => {
-  const savedFormData = localStorage.getItem('patientRegistrationFormData')
-
-  if (savedFormData) {
-    try {
-      return JSON.parse(savedFormData)
-    } catch (e) {
-      console.error('Error parsing saved form data:', e)
-    }
-  }
-
-  return {
-    firstName: '',
-    lastName: '',
-    middleName: '',
-    suffix: '',
-    dateOfBirth: '',
-    sex: '',
-    houseNoStreet: '',
-    barangay: '',
-    cityMunicipality: '',
-    province: '',
-    zipCode: '',
-    mobileNumber: '',
-    emailAddress: '',
-    emergencyContactName: '',
-    emergencyContactRelationship: '',
-    emergencyContactNumber: '',
-    hasReviewed: false,
-    hasConsent: false,
-    hasAgreed: false
-  }
-}
-
-const getInitialStep = () => {
-  const savedStep = localStorage.getItem('patientRegistrationStep')
-  return savedStep ? parseInt(savedStep) : 1
-}
+const REGISTRATION_STEPS = [
+  { label: 'Personal Information' },
+  { label: 'Contact Information' },
+  { label: 'Finished' }
+]
 
 function Register() {
-  const [step, setStep] = useState(getInitialStep())
-  const [showErrors, setShowErrors] = useState(false)
+  const navigate = useNavigate()
+
+  const [formData, setFormData] = useState(() =>
+    loadFormData(STORAGE_KEYS.FORM_DATA, INITIAL_FORM_DATA)
+  )
+  const [step, setStep] = useState(() =>
+    loadCurrentStep(STORAGE_KEYS.CURRENT_STEP)
+  )
+
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [registrationError, setRegistrationError] = useState('')
-  const [generalError, setGeneralError] = useState('')
+  const [validationErrors, setValidationErrors] = useState({})
+
   const [generatedPatientId, setGeneratedPatientId] = useState('')
   const [registeredUserName, setRegisteredUserName] = useState('')
+
+  const { AlertComponent: Step1AlertComponent, showAlert: showStep1Alert } =
+    Alert()
+  const { AlertComponent: Step2AlertComponent, showAlert: showStep2Alert } =
+    Alert()
 
   const [emailFieldError, setEmailFieldError] = useState('')
   const emailInputRef = useRef(null)
 
-  // reCAPTCHA state and ref
   const [recaptchaToken, setRecaptchaToken] = useState(null)
   const [recaptchaError, setRecaptchaError] = useState('')
   const recaptchaRef = useRef(null)
   const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_FRONTEND_KEY
 
   const isInitialMount = useRef(true)
-  const navigate = useNavigate()
-  const [formData, setFormData] = useState(getInitialFormData())
 
+  // save form data to localStorage on changes
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false
@@ -83,38 +85,15 @@ function Register() {
     }
 
     if (step !== 3) {
-      localStorage.setItem(
-        'patientRegistrationFormData',
-        JSON.stringify(formData)
-      )
-      localStorage.setItem('patientRegistrationStep', step.toString())
+      saveFormData(STORAGE_KEYS.FORM_DATA, formData)
+      saveCurrentStep(STORAGE_KEYS.CURRENT_STEP, step)
     }
   }, [formData, step])
 
-  const hasStep1Data = () => {
-    const step1Fields = [
-      'firstName',
-      'lastName',
-      'middleName',
-      'suffix',
-      'dateOfBirth',
-      'sex',
-      'houseNoStreet',
-      'barangay',
-      'cityMunicipality',
-      'province',
-      'zipCode'
-    ]
-
-    return step1Fields.some((field) => {
-      const value = formData[field]
-      return value && value.toString().trim() !== ''
-    })
-  }
-
+  // warn before leaving if form has data
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      if (step === 1 && hasStep1Data()) {
+      if (step === 1 && hasFormData(formData, STEP1_DATA_FIELDS)) {
         e.preventDefault()
         e.returnValue = ''
         return ''
@@ -133,299 +112,217 @@ function Register() {
       [name]: type === 'checkbox' ? checked : value
     })
 
-    if (name === 'emailAddress' && emailFieldError) {
-      setEmailFieldError('')
-    }
-  }
-
-  const generatePatientId = () => {
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = String(now.getMonth() + 1).padStart(2, '0')
-    const day = String(now.getDate()).padStart(2, '0')
-    const randomNum = String(Math.floor(Math.random() * 1000000)).padStart(
-      6,
-      '0'
-    )
-    return `P-${year}${month}${day}-${randomNum}`
-  }
-
-  const generatePassword = () => {
-    const parts = formData.dateOfBirth.split('-')
-    if (parts.length === 3) {
-      const formattedDate = `${parts[1]}${parts[2]}${parts[0]}`
-      return `${formData.lastName
-        .toLowerCase()
-        .replace(/ /g, '')}${formattedDate}`
-    }
-    return ''
-  }
-
-  function nextStep() {
-    setStep(step + 1)
-  }
-
-  function prevStep() {
-    setShowErrors(false)
-    setRegistrationError('')
-    setGeneralError('')
-    setEmailFieldError('')
-    setRecaptchaError('')
-    setStep(step - 1)
-  }
-
-  const handleStep1Next = () => {
-    const nameRegex = /^[A-Za-zÑñáéíóúÁÉÍÓÚ\s\-'.]+$/
-    const zipRegex = /^[0-9]+$/
-    let hasError = false
-
-    const required = [
-      'firstName',
-      'lastName',
-      'dateOfBirth',
-      'sex',
-      'houseNoStreet',
-      'barangay',
-      'cityMunicipality',
-      'province'
-    ]
-
-    required.forEach((field) => {
-      if (!formData[field] || formData[field].trim() === '') {
-        hasError = true
+    // clear field-specific errors
+    if (name === 'emailAddress') {
+      if (emailFieldError) {
+        setEmailFieldError('')
       }
-    })
-
-    if (formData.firstName && !nameRegex.test(formData.firstName))
-      hasError = true
-    if (formData.lastName && !nameRegex.test(formData.lastName)) hasError = true
-    if (formData.middleName && !nameRegex.test(formData.middleName))
-      hasError = true
-    if (formData.suffix && !nameRegex.test(formData.suffix)) hasError = true
-    // if (formData.dateOfBirth && formData.dateOfBirth > new Date())
-    if (formData.cityMunicipality && !nameRegex.test(formData.cityMunicipality))
-      hasError = true
-    if (formData.province && !nameRegex.test(formData.province)) hasError = true
-    if (formData.zipCode && !zipRegex.test(formData.zipCode)) hasError = true
-
-    if (formData.dateOfBirth) {
-      const selectedDate = new Date(formData.dateOfBirth)
-      const today = new Date()
-      // Reset time to compare dates only
-      today.setHours(0, 0, 0, 0)
-
-      if (selectedDate > today) {
-        hasError = true
+      if (validationErrors.emailAddress) {
+        const newErrors = { ...validationErrors }
+        delete newErrors.emailAddress
+        setValidationErrors(newErrors)
       }
+    } else if (validationErrors[name]) {
+      const newErrors = { ...validationErrors }
+      delete newErrors[name]
+      setValidationErrors(newErrors)
     }
+  }
 
-    if (hasError) {
-      setShowErrors(true)
-      setGeneralError(
-        'Please fill in all required fields correctly before proceeding.'
-      )
+  const handleEmailBlur = async () => {
+    const email = formData.emailAddress
+
+    // only check if email has a value and is in valid format
+    if (!email || email.trim() === '') {
       return
     }
 
-    setShowErrors(false)
-    setGeneralError('')
+    // check email format first
+    if (!EMAIL_REGEX.test(email.trim())) {
+      return // format validation will handle this
+    }
+
+    try {
+      const result = await checkEmailExists(email.trim())
+      if (result.exists) {
+        setEmailFieldError(
+          'This email address is already registered. Please use a different email or try logging in.'
+        )
+
+        setValidationErrors((prev) => ({
+          ...prev,
+          emailAddress:
+            'This email address is already registered. Please use a different email or try logging in.'
+        }))
+      } else {
+        // clear email error if it doesn't exist
+        setEmailFieldError('')
+        setValidationErrors((prev) => {
+          const newErrors = { ...prev }
+          if (newErrors.emailAddress?.includes('already registered')) {
+            delete newErrors.emailAddress
+          }
+          return newErrors
+        })
+      }
+    } catch (error) {
+      console.error('Error checking email existence:', error)
+    }
+  }
+
+  const nextStep = () => {
+    setStep(step + 1)
+  }
+
+  const prevStep = () => {
+    setEmailFieldError('')
+    setRecaptchaError('')
+    setValidationErrors({})
+    setStep(step - 1)
+  }
+
+  const handleRecaptchaChange = (token) => {
+    setRecaptchaToken(token)
+    setRecaptchaError('')
+
+    if (validationErrors.recaptcha) {
+      const newErrors = { ...validationErrors }
+      delete newErrors.recaptcha
+      setValidationErrors(newErrors)
+    }
+  }
+
+  const handleStep1Next = () => {
+    const validation = validatePersonalInformation(formData, {
+      requireAll: false
+    })
+
+    if (validation.hasErrors) {
+      setValidationErrors(validation.errors)
+      showStep1Alert(FORM_MESSAGES.STEP1_ERROR, 'danger', { persist: true })
+      return
+    }
+
+    setValidationErrors({})
     nextStep()
   }
 
   const handleStep2Submit = async () => {
-    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
-    const phoneRegex = /^(09|\+639)\d{9}$/
-    const nameRegex = /^[A-Za-zÑñáéíóúÁÉÍÓÚ\s\-'.]+$/
-    let hasError = false
-
-    const required = [
-      'mobileNumber',
-      'emailAddress',
-      'emergencyContactName',
-      'emergencyContactRelationship',
-      'emergencyContactNumber',
-      'hasReviewed',
-      'hasConsent',
-      'hasAgreed'
-    ]
-
-    required.forEach((field) => {
-      if (!formData[field] || formData[field].toString().trim() === '') {
-        hasError = true
-      }
+    const validation = await validateContactInformation(formData, {
+      includeConsent: true,
+      recaptchaToken,
+      requireRecaptcha: true,
+      requireAll: false,
+      checkEmailExists
     })
 
-    if (formData.mobileNumber && !phoneRegex.test(formData.mobileNumber))
-      hasError = true
-    if (formData.emailAddress && !emailRegex.test(formData.emailAddress))
-      hasError = true
-    if (
-      formData.emergencyContactNumber &&
-      !phoneRegex.test(formData.emergencyContactNumber)
-    )
-      hasError = true
-    if (
-      formData.emergencyContactName &&
-      !nameRegex.test(formData.emergencyContactName)
-    )
-      hasError = true
-    if (
-      formData.emergencyContactRelationship &&
-      !nameRegex.test(formData.emergencyContactRelationship)
-    )
-      hasError = true
-
-    // Validate reCAPTCHA
-    if (!recaptchaToken) {
-      setRecaptchaError('Please complete the reCAPTCHA verification.')
-      hasError = true
-    } else {
-      setRecaptchaError('')
-    }
-
-    if (hasError) {
-      setShowErrors(true)
-      setGeneralError(
-        'Please complete all required fields correctly before submitting.'
-      )
+    if (validation.hasErrors) {
+      setValidationErrors(validation.errors)
+      showStep2Alert(FORM_MESSAGES.STEP2_ERROR, 'danger', { persist: true })
+      if (validation.errors.recaptcha) {
+        setRecaptchaError(validation.errors.recaptcha)
+      }
+      if (validation.errors.emailAddress) {
+        setEmailFieldError(validation.errors.emailAddress)
+      }
       return
     }
 
-    setShowErrors(false)
-    setGeneralError('')
+    setValidationErrors({})
+    setEmailFieldError('')
     await handleFirebaseRegistration()
   }
 
   const handleFirebaseRegistration = async () => {
     setIsSubmitting(true)
-    setRegistrationError('')
     setEmailFieldError('')
 
     try {
-      const generatedPassword = generatePassword()
-
-      if (!generatedPassword) {
-        setRegistrationError(
-          'Failed to generate password. Please check your date of birth.'
-        )
+      const password = generatePassword(formData.lastName, formData.dateOfBirth)
+      if (!password) {
+        showStep2Alert(REGISTRATION_ERRORS.PASSWORD_GENERATION, 'danger', {
+          persist: true
+        })
         setIsSubmitting(false)
         return
       }
 
       const patientId = generatePatientId()
 
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        formData.emailAddress,
-        generatedPassword
-      )
-      const user = userCredential.user
-      const uid = user.uid
-
-      const newPatientData = {
+      const userData = buildPatientData({
+        patientId,
+        formData,
         role: PATIENT,
-        patientId: patientId,
+        recaptchaToken
+      })
+
+      const result = await registerPatient({
         email: formData.emailAddress,
-        fullName: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          middleName: formData.middleName || '',
-          suffix: formData.suffix || ''
-        },
-        dateOfBirth: formData.dateOfBirth,
-        sex: formData.sex,
-        address: {
-          houseNoStreet: formData.houseNoStreet,
-          barangay: formData.barangay,
-          cityMunicipality: formData.cityMunicipality,
-          province: formData.province,
-          zipCode: formData.zipCode || ''
-        },
-        contactInfo: {
-          mobileNumber: formData.mobileNumber,
-          emailAddress: formData.emailAddress
-        },
-        emergencyContact: {
-          name: formData.emergencyContactName,
-          relationship: formData.emergencyContactRelationship,
-          mobileNumber: formData.emergencyContactNumber
-        },
-        consents: {
-          hasReviewedInfo: formData.hasReviewed,
-          hasDataPrivacyConsent: formData.hasConsent,
-          hasNotificationConsent: formData.hasAgreed
-        },
-        recaptchaToken: recaptchaToken,
-        createdAt: new Date().toISOString()
-      }
+        password,
+        userData
+      })
 
-      await set(ref(db, 'users/' + uid), newPatientData)
-      await sendEmailVerification(user)
-      await signOut(auth)
+      if (result.success) {
+        setGeneratedPatientId(patientId)
+        setRegisteredUserName(`${formData.firstName} ${formData.lastName}`)
 
-      setGeneratedPatientId(patientId)
-      setRegisteredUserName(`${formData.firstName} ${formData.lastName}`)
+        clearFormData(STORAGE_KEYS.FORM_DATA)
+        clearFormData(STORAGE_KEYS.CURRENT_STEP)
 
-      localStorage.removeItem('patientRegistrationFormData')
-      localStorage.removeItem('patientRegistrationStep')
-
-      nextStep()
-    } catch (error) {
-      console.error('FIREBASE REGISTRATION ERROR:', error)
-
-      let errorMessage = 'Registration failed. Please try again.'
-
-      if (error.code === 'auth/email-already-in-use') {
-        errorMessage =
-          'This email address is already registered. Please use a different email or try logging in.'
-
-        setEmailFieldError('This email is already registered.')
-        setShowErrors(true)
-
-        setTimeout(() => {
-          if (emailInputRef.current) {
-            emailInputRef.current.focus()
-            emailInputRef.current.scrollIntoView({
-              behavior: 'smooth',
-              block: 'center'
-            })
-          }
-        }, 100)
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage =
-          'The email address format is invalid. Please check and try again.'
-        setEmailFieldError('Invalid email format.')
-        setShowErrors(true)
-
-        setTimeout(() => {
-          if (emailInputRef.current) {
-            emailInputRef.current.focus()
-            emailInputRef.current.scrollIntoView({
-              behavior: 'smooth',
-              block: 'center'
-            })
-          }
-        }, 100)
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage =
-          'The password does not meet security requirements. Please try again.'
-      } else if (error.code === 'auth/network-request-failed') {
-        errorMessage =
-          'Network connection error. Please check your internet connection and try again.'
+        nextStep()
       } else {
-        errorMessage =
-          'Something went wrong on our end. Please try again later or contact support if the issue persists.'
+        handleRegistrationError(result.error.code)
       }
-
-      setRegistrationError(errorMessage)
-
+    } catch (error) {
+      console.error('REGISTRATION ERROR:', error)
+      showStep2Alert(REGISTRATION_ERRORS.GENERAL, 'danger', { persist: true })
+    } finally {
       if (recaptchaRef.current) {
         recaptchaRef.current.reset()
       }
       setRecaptchaToken(null)
-    } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handleRegistrationError = (errorCode) => {
+    const errorMessage = getFirebaseErrorMessage(errorCode)
+
+    if (errorCode === EMAIL_ALREADY_IN_USE_CODE) {
+      setEmailFieldError(REGISTRATION_ERRORS.EMAIL_IN_USE_SHORT)
+
+      setValidationErrors((prev) => ({
+        ...prev,
+        emailAddress: REGISTRATION_ERRORS.EMAIL_IN_USE_SHORT
+      }))
+      setTimeout(() => {
+        if (emailInputRef.current) {
+          emailInputRef.current.focus()
+          emailInputRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          })
+        }
+      }, 100)
+    } else if (errorCode === INVALID_EMAIL_CODE) {
+      setEmailFieldError(REGISTRATION_ERRORS.INVALID_EMAIL_SHORT)
+
+      setValidationErrors((prev) => ({
+        ...prev,
+        emailAddress: REGISTRATION_ERRORS.INVALID_EMAIL_SHORT
+      }))
+      setTimeout(() => {
+        if (emailInputRef.current) {
+          emailInputRef.current.focus()
+          emailInputRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          })
+        }
+      }, 100)
+    }
+
+    showStep2Alert(errorMessage, 'danger', { persist: true })
   }
 
   const handleRedirect = () => {
@@ -441,8 +338,10 @@ function Register() {
               formData={formData}
               handleChange={handleChange}
               nextStep={handleStep1Next}
-              showErrors={showErrors}
-              generalError={generalError}
+              validationErrors={validationErrors}
+              steps={REGISTRATION_STEPS}
+              currentStep={step}
+              AlertComponent={Step1AlertComponent}
             />
           )}
 
@@ -452,18 +351,20 @@ function Register() {
               handleChange={handleChange}
               nextStep={handleStep2Submit}
               prevStep={prevStep}
-              showErrors={showErrors}
               isSubmitting={isSubmitting}
-              registrationError={registrationError}
-              generalError={generalError}
               emailFieldError={emailFieldError}
               emailInputRef={emailInputRef}
+              handleBlur={handleEmailBlur}
               recaptchaToken={recaptchaToken}
-              setRecaptchaToken={setRecaptchaToken}
+              setRecaptchaToken={handleRecaptchaChange}
               recaptchaError={recaptchaError}
               setRecaptchaError={setRecaptchaError}
               recaptchaRef={recaptchaRef}
               RECAPTCHA_SITE_KEY={RECAPTCHA_SITE_KEY}
+              validationErrors={validationErrors}
+              steps={REGISTRATION_STEPS}
+              currentStep={step}
+              AlertComponent={Step2AlertComponent}
             />
           )}
 
@@ -472,6 +373,8 @@ function Register() {
               handleRedirect={handleRedirect}
               patientId={generatedPatientId}
               userName={registeredUserName}
+              steps={REGISTRATION_STEPS}
+              currentStep={step}
             />
           )}
         </div>

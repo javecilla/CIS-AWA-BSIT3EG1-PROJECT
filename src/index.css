@@ -173,9 +173,9 @@ input.input-list:read-only {
   background-color: transparent;
 }
 .btn-outline-secondary:focus {
-  border: 1.5px solid var(--color-primary-light);
-  color: var(--color-primary-light);
-  background-color: transparent;
+  border: 1.5px solid var(--color-primary-light) !important;
+  color: var(--color-primary-light) !important;
+  background-color: transparent !important;
 }
 .btn-outline-secondary:hover {
   background-color: transparent;

@@ -3,8 +3,7 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   base: '/',
@@ -13,6 +12,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    assetsInlineLimit: 4096,
     rollupOptions: {
       output: {
         assetFileNames: (assetInfo) => {
@@ -25,11 +25,15 @@ export default defineConfig({
           return 'assets/[name]-[hash][extname]'
         }
       }
-    }
+    },
+    chunkSizeWarningLimit: 1000
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
     }
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom']
   }
 })

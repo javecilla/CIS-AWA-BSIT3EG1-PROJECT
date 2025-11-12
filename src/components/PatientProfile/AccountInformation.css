@@ -1,0 +1,26 @@
+/* AccountInformation component styles */
+.account-form-section {
+  width: 100%;
+}
+
+.section-title {
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.ai-email-group {
+  margin-bottom: 1rem;
+}
+
+.update-account-btn {
+  margin-top: 1rem;
+}

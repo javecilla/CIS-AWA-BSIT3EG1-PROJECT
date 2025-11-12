@@ -1,28 +1,25 @@
 import './Dashboard.css'
-import Header from '@/components/Header'
-import TotalAppointments from '@/components/TotalAppointments'
-import PatientRegistered from '@/components/PatientRegistered'
-import PatientAppointmentList from '@/components/PatientAppointmentList'
-import PatientRegisteredList from '@/components/PatientRegisteredList'
+import AppointmentMetrics from '@/components/WidgetCards/AppointmentMetrics'
+import PatientMetrics from '@/components/WidgetCards/PatientMetrics'
+import PatientsRegisteredTable from '@/components/Tables/PatientsRegisteredTable'
+import AppointmentsRecordTable from '@/components/Tables/AppointmentsRecordTable'
 
 function Dashboard() {
   return (
     <>
-      <Header />
-
       <div className="container">
         <div className="row gx-4 gy-4 align-items-stretch profile-consult-row">
-          <TotalAppointments />
+          <AppointmentMetrics />
 
-          <PatientRegistered />
+          <PatientMetrics />
         </div>
 
         <div className="patient-table-container mt-4">
-          <PatientRegisteredList />
+          <PatientsRegisteredTable />
         </div>
 
-        <div className="patient-table-container mt-4">
-          <PatientAppointmentList />
+        <div className="appointment-table-container mt-4">
+          <AppointmentsRecordTable />
         </div>
       </div>
     </>

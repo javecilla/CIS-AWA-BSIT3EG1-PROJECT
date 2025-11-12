@@ -11,12 +11,21 @@ Animal Bite Center (CIS) /
 │   ├── libs/           # Third-party libraries
 │   ├── constants/      # Static data
 │   ├── context/        # React context providers
-│   ├── hooks/          # Custom hooks
+│   ├── hooks/          # Reusable hooks
 │   ├── App.jsx         # Root component
 │   ├── index.css       # Base stylesheets
 │   └── main.jsx        # Entry point
 ├── public/             # Public assets
-└── ... config files
+│   └── assets/         # Static assets
+├── functions/          # Firebase functions
+│   └── ...             # Firebase functions
+├── .env                # Environment variables
+├── .env.example        # Environment variables template
+├── vite.config.js      # Build and development setup
+├── eslint.config.js    # Code style and quality rules
+├── firebase.json       # Firebase hosting configuration
+├── package.json        # Dependencies and scripts
+└── README.md           # Project documentation
 ```
 
 ## Directory Details
