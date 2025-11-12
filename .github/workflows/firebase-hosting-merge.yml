@@ -53,14 +53,19 @@ jobs:
           VITE_EMAILJS_PRIVATE_API_KEY: ${{ secrets.VITE_EMAILJS_PRIVATE_API_KEY }}
           VITE_EMAILJS_SENDER_MAIL: ${{ secrets.VITE_EMAILJS_SENDER_MAIL }}
 
-      # Step 7: Deploy Firebase Functions
+      # Step 7: Authenticate with Google Cloud
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+
+      # Step 8: Deploy Firebase Functions
       - name: Deploy Firebase Functions
         run: |
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" > $HOME/firebase-service-account.json
-          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/firebase-service-account.json
+          firebase use cis-awa-bsit3eg1-project --non-interactive
           firebase deploy --only functions --non-interactive --project cis-awa-bsit3eg1-project
 
-      # Step 8: Deploy to Firebase Hosting (Live Channel)
+      # Step 9: Deploy to Firebase Hosting (Live Channel)
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
