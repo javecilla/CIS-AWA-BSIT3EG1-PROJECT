@@ -1,147 +1,125 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import ReCAPTCHA from 'react-google-recaptcha'
-import { ref, get, child } from 'firebase/database'
-import {
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  sendEmailVerification
-} from 'firebase/auth'
 
 import './Login.css'
-import { auth, db } from '@/libs/firebase.js'
-import { PATIENT, STAFF } from '@/constants/user-roles'
-import loginImage from '@/assets/images/login-image.png'
-import logoClinic from '@/assets/images/logo-clinic.png'
 import { useRoleNavigation } from '@/hooks/useRoleNavigation'
+import Alert from '@/components/Alert'
+import loginImage from '@/assets/images/login-image.png'
+import LogoBrand from '@/components/LogoBrand'
+
+import {
+  loginWithEmailPassword,
+  logout,
+  sendEmailVerification,
+  reloadUser,
+  onAuthStateChange,
+  getUserData,
+  isAuthError,
+  getAuthErrorMessage
+} from '@/services/authService'
+
+import { validateLoginForm } from '@/utils/form-validation'
+import { formatTime } from '@/utils/formatter'
+import {
+  checkLoginLockout,
+  setLoginLockout,
+  clearLoginLockout,
+  incrementFailedAttempts,
+  getFailedAttempts,
+  checkVerificationCooldown,
+  setVerificationCooldown,
+  clearVerificationCooldown,
+  LOCKOUT_CONFIG
+} from '@/utils/user-login'
+
+import {
+  LOGIN_ERRORS,
+  VERIFICATION_MESSAGES,
+  RATE_LIMIT_ERROR_CODE
+} from '@/constants/error-messages'
 
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-
-  const [authIsLoading, setAuthIsLoading] = useState(true)
-  const [currentUser, setCurrentUser] = useState(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [loginStep, setLoginStep] = useState('login')
-
-  const [generalError, setGeneralError] = useState('')
-  const [validationErrors, setValidationErrors] = useState({})
-
-  const [verificationMessage, setVerificationMessage] = useState('')
-  const [verificationStatus, setVerificationStatus] = useState('warning')
-  const [countdown, setCountdown] = useState(0)
-
-  const [failedAttempts, setFailedAttempts] = useState(0)
-  const [isLocked, setIsLocked] = useState(false)
-  const [lockoutCountdown, setLockoutCountdown] = useState(0)
-
   const [recaptchaToken, setRecaptchaToken] = useState(null)
   const recaptchaRef = useRef(null)
+
+  const [authIsLoading, setAuthIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [loginStep, setLoginStep] = useState('login') // 'login' or 'verify'
+
+  const [currentUser, setCurrentUser] = useState(null)
+  const [validationErrors, setValidationErrors] = useState({})
+  const [countdown, setCountdown] = useState(0)
+
+  const [isLocked, setIsLocked] = useState(false)
+  const [lockoutCountdown, setLockoutCountdown] = useState(0)
+  const [failedAttempts, setFailedAttempts] = useState(0)
+
   const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_FRONTEND_KEY
-
-  const COOLDOWN_KEY = 'verification_cooldown_expiry'
-  const LOCKOUT_KEY = 'login_lockout_expiry'
-  const FAILED_ATTEMPTS_KEY = 'failed_login_attempts'
-  const MAX_ATTEMPTS = 3
-  const LOCKOUT_DURATION = 60
-
-  // const navigate = useNavigate()
   const { navigate } = useRoleNavigation()
+  const { AlertComponent: LoginAlertComponent, showAlert: showLoginAlert } =
+    Alert()
+  const { AlertComponent: VerifyAlertComponent, showAlert: showVerifyAlert } =
+    Alert()
 
-  //check for existing login lockout
+  // lockout state
   useEffect(() => {
-    const storedLockoutExpiry = localStorage.getItem(LOCKOUT_KEY)
-    const storedFailedAttempts = localStorage.getItem(FAILED_ATTEMPTS_KEY)
+    const lockout = checkLoginLockout()
+    const attempts = getFailedAttempts()
 
-    if (storedFailedAttempts) {
-      setFailedAttempts(parseInt(storedFailedAttempts))
-    }
+    setFailedAttempts(attempts)
 
-    if (storedLockoutExpiry) {
-      const remainingTime = Math.max(
-        0,
-        Math.floor((parseInt(storedLockoutExpiry) - Date.now()) / 1000)
-      )
-      if (remainingTime > 0) {
-        setIsLocked(true)
-        setLockoutCountdown(remainingTime)
-      } else {
-        localStorage.removeItem(LOCKOUT_KEY)
-        localStorage.removeItem(FAILED_ATTEMPTS_KEY)
-        setFailedAttempts(0)
-        setIsLocked(false)
-      }
+    if (lockout.isLocked) {
+      setIsLocked(true)
+      setLockoutCountdown(lockout.remainingSeconds)
+      const lockoutMessage = `${LOGIN_ERRORS.LOCKOUT_WARNING_BASE} ${formatTime(
+        lockout.remainingSeconds
+      )} ${LOGIN_ERRORS.LOCKOUT_WARNING_END}`
+      showLoginAlert(lockoutMessage, 'danger', { persist: true })
     }
   }, [])
 
-  //check for existing resend verification email cooldown
+  // verification cooldown
   useEffect(() => {
-    const storedExpiry = localStorage.getItem(COOLDOWN_KEY)
-
-    if (storedExpiry) {
-      const remainingTime = Math.max(
-        0,
-        Math.floor((parseInt(storedExpiry) - Date.now()) / 1000)
-      )
-      if (remainingTime > 0) {
-        setCountdown(remainingTime)
-      } else {
-        localStorage.removeItem(COOLDOWN_KEY)
-      }
+    const cooldown = checkVerificationCooldown()
+    if (cooldown.isActive) {
+      setCountdown(cooldown.remainingSeconds)
     }
   }, [])
 
-  //auth state listener - handles redirects on verified login
+  // auth state listener
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      //force token refresh para ma-get  yung pinaka latest email verification status
+    const unsubscribe = onAuthStateChange(async (user) => {
       if (user) {
         await user.reload()
       }
 
       if (user && user.emailVerified) {
-        //if user is authenticated and verified
         setCurrentUser(user)
-        try {
-          const userRef = child(ref(db), 'users/' + user.uid)
-          const snapshot = await get(userRef)
+        const result = await getUserData(user.uid)
 
-          if (snapshot.exists()) {
-            const userData = snapshot.val()
-
-            localStorage.removeItem(FAILED_ATTEMPTS_KEY)
-            localStorage.removeItem(LOCKOUT_KEY)
-            setFailedAttempts(0)
-            setIsLocked(false)
-
-            if (userData.role) {
-              // navigate(`/${userData.role}/dashboard`)
-              navigate('/dashboard')
-            } else {
-              //role not found
-              setGeneralError('User role not found. Please contact support.')
-              await signOut(auth)
-            }
-          } else {
-            //no db record
-            setGeneralError('User profile data not found.')
-            await signOut(auth)
-          }
-        } catch (error) {
-          setGeneralError('Failed to fetch user data.')
-          await signOut(auth)
+        if (result.success && result.data.role) {
+          clearLoginLockout()
+          navigate('/dashboard')
+        } else {
+          showLoginAlert(
+            result.error?.message || VERIFICATION_MESSAGES.ROLE_NOT_FOUND,
+            'danger',
+            { persist: true }
+          )
+          await logout()
         }
       } else if (user && !user.emailVerified) {
-        //yung user is authenticated but not verified
         setCurrentUser(user)
         setLoginStep('verify')
-        setVerificationMessage(
-          'Your account is not verified. Please verify it first.'
+        showVerifyAlert(
+          VERIFICATION_MESSAGES.ACCOUNT_NOT_VERIFIED_SIMPLE,
+          'warning',
+          { persist: true }
         )
-        setVerificationStatus('warning')
       } else {
-        //if user is logged out
         setCurrentUser(null)
         setLoginStep('login')
       }
@@ -152,17 +130,15 @@ function Login() {
     return () => unsubscribe()
   }, [navigate])
 
-  //resent verification link countdown timer
+  // verification cooldown timer
   useEffect(() => {
     if (countdown > 0) {
       const timer = setInterval(() => {
-        setCountdown((prevCount) => {
-          const newCount = prevCount - 1
-
+        setCountdown((prev) => {
+          const newCount = prev - 1
           if (newCount === 0) {
-            localStorage.removeItem(COOLDOWN_KEY)
+            clearVerificationCooldown()
           }
-
           return newCount
         })
       }, 1000)
@@ -171,44 +147,52 @@ function Login() {
     }
   }, [countdown])
 
-  //lock countdown timer
+  // lockout timer
   useEffect(() => {
     if (lockoutCountdown > 0) {
       const timer = setInterval(() => {
-        setLockoutCountdown((prevCount) => {
-          const newCount = prevCount - 1
-
+        setLockoutCountdown((prev) => {
+          const newCount = prev - 1
           if (newCount === 0) {
             setIsLocked(false)
             setFailedAttempts(0)
-            localStorage.removeItem(LOCKOUT_KEY)
-            localStorage.removeItem(FAILED_ATTEMPTS_KEY)
-            setGeneralError('')
+            clearLoginLockout()
+            // Clear the lockout alert when countdown finishes
+            showLoginAlert('', '') // Clear alert
           }
-
           return newCount
         })
       }, 1000)
 
       return () => clearInterval(timer)
     }
-  }, [lockoutCountdown])
+  }, [lockoutCountdown, showLoginAlert])
+
+  // update lockout alert message when countdown changes
+  useEffect(() => {
+    if (isLocked && lockoutCountdown > 0) {
+      const lockoutMessage = `${LOGIN_ERRORS.LOCKOUT_WARNING_BASE} ${formatTime(
+        lockoutCountdown
+      )} ${LOGIN_ERRORS.LOCKOUT_WARNING_END}`
+      showLoginAlert(lockoutMessage, 'danger', { persist: true })
+    } else if (!isLocked && lockoutCountdown === 0) {
+      // Clear alert when lockout is cleared
+      showLoginAlert('', '')
+    }
+  }, [isLocked, lockoutCountdown, showLoginAlert])
 
   const handleFailedLogin = () => {
-    const newFailedAttempts = failedAttempts + 1
-    setFailedAttempts(newFailedAttempts)
-    localStorage.setItem(FAILED_ATTEMPTS_KEY, newFailedAttempts.toString())
+    const newAttempts = incrementFailedAttempts()
+    setFailedAttempts(newAttempts)
 
-    if (newFailedAttempts >= MAX_ATTEMPTS) {
-      //locked yung account
-      const lockoutExpiry = Date.now() + LOCKOUT_DURATION * 1000
-      localStorage.setItem(LOCKOUT_KEY, lockoutExpiry.toString())
+    if (newAttempts >= LOCKOUT_CONFIG.MAX_ATTEMPTS) {
+      setLoginLockout()
       setIsLocked(true)
-      setLockoutCountdown(LOCKOUT_DURATION)
-      setGeneralError(
-        `Too many failed login attempts. Please wait ${
-          LOCKOUT_DURATION / 60
-        } minutes before trying again.`
+      setLockoutCountdown(LOCKOUT_CONFIG.LOCKOUT_DURATION)
+      showLoginAlert(
+        LOGIN_ERRORS.TOO_MANY_ATTEMPTS(LOCKOUT_CONFIG.LOCKOUT_DURATION / 60),
+        'danger',
+        { persist: true }
       )
     }
   }
@@ -218,100 +202,95 @@ function Login() {
     setPassword('')
     setRecaptchaToken(null)
     setValidationErrors({})
-    setGeneralError('')
-    setVerificationMessage('')
-    setVerificationStatus('warning')
     setCountdown(0)
-    localStorage.removeItem(COOLDOWN_KEY)
+    clearVerificationCooldown()
     if (recaptchaRef.current) {
       recaptchaRef.current.reset()
     }
   }
 
-  const validateForm = () => {
-    const errors = {}
-    if (!email) {
-      errors.email = 'Please provide an email address.'
-    }
-    if (!password) {
-      errors.password = 'Password is required!'
-    }
-    if (!recaptchaToken) {
-      errors.recaptcha = 'Please check the recaptcha.'
-    }
-    setValidationErrors(errors)
-    return Object.keys(errors).length === 0
-  }
-
   const handleLogin = async (e) => {
     e.preventDefault()
-    setGeneralError('')
 
     if (isLocked) {
-      setGeneralError(
-        `Account is locked. Please wait ${Math.ceil(
-          lockoutCountdown / 60
-        )} minute(s) before trying again.`
+      showLoginAlert(
+        LOGIN_ERRORS.ACCOUNT_LOCKED(Math.ceil(lockoutCountdown / 60)),
+        'danger',
+        { persist: true }
       )
       return
     }
 
-    if (!validateForm()) return
+    const errors = validateLoginForm({ email, password, recaptchaToken })
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors)
+
+      // show alert for missing required fields
+      const missingFields = []
+      if (errors.email) missingFields.push('email')
+      if (errors.password) missingFields.push('password')
+
+      let alertMessage = 'Please fill in all required fields.'
+      if (missingFields.length === 1) {
+        alertMessage =
+          missingFields[0] === 'email'
+            ? LOGIN_ERRORS.EMAIL_REQUIRED
+            : LOGIN_ERRORS.PASSWORD_REQUIRED
+      } else if (missingFields.length === 2) {
+        alertMessage = 'Please provide both email and password.'
+      }
+
+      showLoginAlert(alertMessage, 'danger', { persist: true })
+      return
+    }
 
     setIsSubmitting(true)
 
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      )
+    const result = await loginWithEmailPassword(email, password)
 
-      localStorage.removeItem(FAILED_ATTEMPTS_KEY)
-      localStorage.removeItem(LOCKOUT_KEY)
-      setFailedAttempts(0)
+    if (result.success) {
+      clearLoginLockout()
 
-      if (!userCredential.user.emailVerified) {
+      if (!result.emailVerified) {
         setLoginStep('verify')
-        setVerificationMessage(
-          'Your account is not verified. Please verify it first. Click the button below to verify your account.'
-        )
-        setVerificationStatus('warning')
-        setCurrentUser(userCredential.user)
+        showVerifyAlert(VERIFICATION_MESSAGES.ACCOUNT_NOT_VERIFIED, 'warning', {
+          persist: true
+        })
+        setCurrentUser(result.user)
       }
-    } catch (error) {
-      if (
-        error.code === 'auth/invalid-credential' ||
-        error.code === 'auth/wrong-password' ||
-        error.code === 'auth/user-not-found'
-      ) {
+    } else {
+      if (isAuthError(result.error.code)) {
         handleFailedLogin()
 
-        const remainingAttempts = MAX_ATTEMPTS - (failedAttempts + 1)
+        const remainingAttempts =
+          LOCKOUT_CONFIG.MAX_ATTEMPTS - (failedAttempts + 1)
         if (remainingAttempts > 0) {
           setValidationErrors({
-            email: `Invalid email or password! Please try again. You have ${remainingAttempts} attempt(s) remaining.`
+            email: LOGIN_ERRORS.INVALID_CREDENTIALS(remainingAttempts)
+          })
+        } else {
+          setValidationErrors({
+            email: LOGIN_ERRORS.INVALID_CREDENTIALS(0)
           })
         }
         setPassword('')
       } else {
-        setGeneralError(
-          'Something went wrong on our end. Please try again later.'
-        )
+        showLoginAlert(getAuthErrorMessage(result.error.code), 'danger', {
+          persist: true
+        })
       }
-      console.error('FIREBASE LOGIN ERROR:', error)
-    } finally {
-      if (recaptchaRef.current) {
-        recaptchaRef.current.reset()
-      }
-      setRecaptchaToken(null)
-      setIsSubmitting(false)
     }
+
+    if (recaptchaRef.current) {
+      recaptchaRef.current.reset()
+    }
+    setRecaptchaToken(null)
+    setIsSubmitting(false)
   }
 
   const handleBackToLogin = async () => {
     setIsSubmitting(true)
-    await signOut(auth)
+    await logout()
     setCurrentUser(null)
     resetForm()
     setLoginStep('login')
@@ -320,42 +299,47 @@ function Login() {
 
   const handleResendVerification = async () => {
     if (!currentUser) {
-      setVerificationMessage('User session lost. Please go back and try again.')
-      setVerificationStatus('danger')
+      showVerifyAlert(VERIFICATION_MESSAGES.SESSION_LOST, 'danger', {
+        persist: true
+      })
       return
     }
 
     setIsSubmitting(true)
-    try {
-      await sendEmailVerification(currentUser)
-      setVerificationMessage(
-        'Verification email sent! Please check your inbox.'
-      )
-      setVerificationStatus('success')
+    const result = await sendEmailVerification(currentUser)
 
-      const expiryTime = Date.now() + 60 * 1000
-      localStorage.setItem(COOLDOWN_KEY, expiryTime.toString())
+    if (result.success) {
+      showVerifyAlert(VERIFICATION_MESSAGES.EMAIL_SENT, 'success')
+      setVerificationCooldown()
       setCountdown(60)
-    } catch (error) {
-      setVerificationStatus('danger')
-      if (error.code === 'auth/too-many-requests') {
-        setVerificationMessage(
-          'You have requested this too many times. Please wait a moment and try again.'
-        )
+    } else {
+      if (result.error.code === RATE_LIMIT_ERROR_CODE) {
+        showVerifyAlert(VERIFICATION_MESSAGES.TOO_MANY_REQUESTS, 'danger', {
+          persist: true
+        })
       } else {
-        setVerificationMessage(
-          'Failed to send verification email. Please try again.'
-        )
+        showVerifyAlert(VERIFICATION_MESSAGES.FAILED_TO_SEND, 'danger', {
+          persist: true
+        })
       }
-    } finally {
-      setIsSubmitting(false)
     }
+
+    setIsSubmitting(false)
   }
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
+  const handleCheckVerification = async () => {
+    setIsSubmitting(true)
+    if (currentUser) {
+      const result = await reloadUser(currentUser)
+      if (result.success && result.emailVerified) {
+        window.location.reload()
+      } else {
+        showVerifyAlert(VERIFICATION_MESSAGES.EMAIL_NOT_VERIFIED, 'warning', {
+          persist: true
+        })
+      }
+    }
+    setIsSubmitting(false)
   }
 
   if (authIsLoading) {
@@ -382,23 +366,15 @@ function Login() {
                 src={loginImage}
                 className="left-img"
                 alt="Patient Login"
-                loading="lazy"
+                loading="eager"
+                fetchPriority="high"
               />
             </div>
 
             <div className="col-lg-6">
-              <div className="d-flex align-items-center mb-3">
-                <img
-                  src={logoClinic}
-                  className="logo-circle me-3 logo"
-                  alt="Clinic Logo"
-                />
-                <div>
-                  <h4 className="fw-medium mb-0 logo-text">Animal Bite</h4>
-                  <h4 className="fw-bold logo-text">CENTER</h4>
-                </div>
-              </div>
+              <LogoBrand className="mb-3" />
 
+              {/* LOGIN FORM */}
               <form
                 className={`login-card my-3 ${
                   loginStep !== 'login' ? 'd-none' : ''
@@ -408,39 +384,8 @@ function Login() {
               >
                 <p className="text-under fw-medium">Login to your account</p>
 
-                {/* Lockout Warning */}
-                {isLocked && (
-                  <div
-                    className="alert alert-danger d-flex align-items-center"
-                    role="alert"
-                  >
-                    <i className="bi flex-shrink-0 me-2 fa-solid fa-lock"></i>
-                    <div>
-                      Account locked due to multiple failed login attempts.
-                      Please wait{' '}
-                      <strong>{formatTime(lockoutCountdown)}</strong> before
-                      trying again.
-                    </div>
-                  </div>
-                )}
-
-                {/* General Error Alert */}
-                {generalError && !isLocked && (
-                  <div
-                    className="alert alert-danger d-flex align-items-center"
-                    role="alert"
-                  >
-                    <i className="bi flex-shrink-0 me-2 fa-solid fa-triangle-exclamation"></i>
-                    <div>{generalError}</div>
-                  </div>
-                )}
-
-                {/* General Validation Error */}
-                {validationErrors.general && (
-                  <div className="alert alert-danger">
-                    {validationErrors.general}
-                  </div>
-                )}
+                {/* Alert Component */}
+                <LoginAlertComponent />
 
                 <div>
                   <label className="fw-medium field-label">Email:</label>
@@ -499,24 +444,28 @@ function Login() {
                   )}
                 </div>
 
-                <div className="mt-4 mb-3 d-flex justify-content-center">
-                  <ReCAPTCHA
-                    ref={recaptchaRef}
-                    sitekey={RECAPTCHA_SITE_KEY}
-                    onChange={(token) => {
-                      setRecaptchaToken(token)
-                      setValidationErrors((prev) => ({
-                        ...prev,
-                        recaptcha: null
-                      }))
-                    }}
-                    onExpired={() => setRecaptchaToken(null)}
-                  />
-                </div>
-                {validationErrors.recaptcha && (
-                  <div className="error-message recaptcha">
-                    {validationErrors.recaptcha}
-                  </div>
+                {!isLocked && (
+                  <>
+                    <div className="mt-4 mb-3 d-flex justify-content-center">
+                      <ReCAPTCHA
+                        ref={recaptchaRef}
+                        sitekey={RECAPTCHA_SITE_KEY}
+                        onChange={(token) => {
+                          setRecaptchaToken(token)
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            recaptcha: null
+                          }))
+                        }}
+                        onExpired={() => setRecaptchaToken(null)}
+                      />
+                    </div>
+                    {validationErrors.recaptcha && (
+                      <div className="error-message recaptcha">
+                        {validationErrors.recaptcha}
+                      </div>
+                    )}
+                  </>
                 )}
 
                 <hr className="break-line mb-4" />
@@ -553,7 +502,7 @@ function Login() {
                 </p>
               </form>
 
-              {/* --- VERIFICATION CARD --- */}
+              {/* VERIFICATION CARD */}
               <div
                 className={`verification-card ${
                   loginStep !== 'verify' ? 'd-none' : ''
@@ -563,28 +512,8 @@ function Login() {
                   Verify your account first
                 </p>
 
-                {/* General/Status Message Area */}
-                {verificationMessage && (
-                  <div
-                    className={`alert ${
-                      verificationStatus === 'success'
-                        ? 'alert-success'
-                        : verificationStatus === 'warning'
-                        ? 'alert-warning'
-                        : 'alert-danger'
-                    } d-flex align-items-center`}
-                    role="alert"
-                  >
-                    <i
-                      className={`bi flex-shrink-0 me-2 fa-solid ${
-                        verificationStatus === 'success'
-                          ? 'fa-circle-check'
-                          : 'fa-triangle-exclamation'
-                      }`}
-                    ></i>
-                    <div>{verificationMessage}</div>
-                  </div>
-                )}
+                {/* Alert Component */}
+                <VerifyAlertComponent />
 
                 <hr />
 
@@ -603,22 +532,7 @@ function Login() {
                 <button
                   type="button"
                   className="btn w-100 btn-secondary py-2 mb-2"
-                  onClick={async () => {
-                    setIsSubmitting(true)
-                    if (currentUser) {
-                      await currentUser.reload()
-                      //force auth state check tapos reload page kung verified na
-                      if (currentUser.emailVerified) {
-                        window.location.reload()
-                      } else {
-                        setVerificationMessage(
-                          'Email not verified yet. Please check your inbox and try again.'
-                        )
-                        setVerificationStatus('warning')
-                      }
-                    }
-                    setIsSubmitting(false)
-                  }}
+                  onClick={handleCheckVerification}
                   disabled={isSubmitting}
                 >
                   I've Verified - Continue

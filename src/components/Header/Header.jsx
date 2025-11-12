@@ -1,14 +1,15 @@
-import './Header.css'
-import BreadCrumb from '@/components/BreadCrumb'
-import { useUser } from '@/contexts/UserContext'
+import './Header.css';
+import BreadCrumb from '@/components/BreadCrumb';
+import { useUser } from '@/contexts/UserContext';
 
 function Header() {
-  const { userData, loading } = useUser()
+  const { userData, loading } = useUser();
 
-  // console.log('User Data in Header:', userData)
   if (loading) {
-    return <div>Loading...</div>
+    return null;
   }
+
+  const lastName = userData?.fullName?.lastName || 'Guest';
 
   return (
     <header className="welcome-section">
@@ -16,12 +17,12 @@ function Header() {
         <BreadCrumb />
         <h3>
           Welcome Back,{' '}
-          <strong>{userData.fullName.lastName.toUpperCase() || 'Guest'}</strong>
+          <strong>{String(lastName).toUpperCase()}</strong>
           !
         </h3>
       </div>
     </header>
-  )
+  );
 }
 
 export default Header

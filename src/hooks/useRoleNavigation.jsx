@@ -12,11 +12,10 @@ export function useRoleNavigation() {
     return null
   }
 
-  const navigateWithRole = (path, options) => {
+  const navigateWithRole = (path, options = {}) => {
     const rolePrefix = getRolePrefix()
 
     if (!rolePrefix) {
-      // console.error('No valid role found for navigation')
       return
     }
 
@@ -26,7 +25,7 @@ export function useRoleNavigation() {
     navigate(fullPath, options)
   }
 
-  //g full path with role prefix (for Link/NavLink components)
+  // get full path with role prefix (for Link/NavLink components)
   const getPathWithRole = (path) => {
     const rolePrefix = getRolePrefix()
 
@@ -34,7 +33,6 @@ export function useRoleNavigation() {
       return '/auth/login'
     }
 
-    //avoid double slashes
     const cleanPath = path.startsWith('/') ? path.slice(1) : path
     return `/${rolePrefix}/${cleanPath}`
   }

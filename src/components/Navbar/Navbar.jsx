@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { signOut } from 'firebase/auth'
-import { auth } from '@/libs/firebase.js'
 import './Navbar.css'
+import NavBrand from '@/components/NavBrand'
+import { logout } from '@/services/authService'
 
 function Navbar() {
   const navigate = useNavigate()
@@ -12,7 +12,10 @@ function Navbar() {
   const handleLogout = async () => {
     setIsLoggingOut(true)
     try {
-      await signOut(auth)
+      const result = await logout()
+      if (!result.success) {
+        console.error('Logout failed:', result.error?.message)
+      }
       navigate('/auth/login')
     } catch (error) {
       console.error('Logout failed:', error)
@@ -25,13 +28,7 @@ function Navbar() {
     <nav className="navbar d-flex justify-content-between align-items-center">
       <div className="nav-container container">
         <div className="navbar-left d-flex align-items-center">
-          <div className="logo-container d-flex align-items-center">
-            <img src="/assets/images/logo.png" alt="Main Logo" />
-            <div className="text-logo d-flex flex-column">
-              <h3 className="m-0">Animal Bite</h3>
-              <h3 className="m-0">CENTER</h3>
-            </div>
-          </div>
+          <NavBrand />
         </div>
 
         <div className="navbar-right">
