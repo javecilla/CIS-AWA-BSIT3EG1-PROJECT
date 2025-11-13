@@ -108,9 +108,8 @@ _Goal: Build staff tools, integrate everything, conduct final testing, and submi
 | **BE: Fetch Appointments & Update Patient Data**  | Jerome      | **High** | Nov 10 (Mon) | **Done** |
 | **FE: Walk-in Patient Registration Form**  | Mico        | Medium   | Nov 11 (Tue) | **Done** |
 | **BE: Staff-side Patient Registration**    | Jerome      | Medium   | Nov 11 (Tue) | **Done** |
-| **BE: Cleaning and Polishing Code**        | Jerome      | Medium   | Nov 12 (Wed) | Pending |
-| **QA: Full System Functional Testing**     | Giga        | **High** | Nov 13 (Thu) | Pending |
-| **All Devs: Final Bug Fixing & Polish**    | All Devs    | **High** | Nov 14 (Fri) | Pending |
+| **BE: Cleaning and Polishing Code**        | Jerome      | Medium   | Nov 12 (Wed) | **Done** |
+| **QA: Full System Functional Testing**     | Giga        | **High** | Nov 13 (Thu) | **Done** |
 | **Final Project Submission**               | Jerome      | **High** | Nov 14 (Fri) | Pending |
 
 ---
