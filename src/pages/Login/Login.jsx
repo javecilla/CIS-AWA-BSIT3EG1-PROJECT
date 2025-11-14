@@ -361,7 +361,7 @@ function Login() {
       <div className="row justify-content-center w-100">
         <div className="col-lg-10">
           <div className="row align-items-center">
-            <div className="col-lg-6 mb-4 mb-lg-0">
+            <div className="col-lg-6 mb-4 mb-lg-0 d-none d-lg-block">
               <img
                 src={loginImage}
                 className="left-img"
