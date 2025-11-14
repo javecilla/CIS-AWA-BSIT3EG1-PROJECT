@@ -37,7 +37,7 @@ export default function ContactInfo({
 
   return (
     <div className="row align-items-start">
-      <div className="col-lg-6 mb-4 mb-lg-0 p-0">
+      <div className="col-lg-6 mb-4 mb-lg-0 p-0 d-none d-lg-block">
         <img src={registerImage} className="w-100 rounded-4" />
       </div>
 
