@@ -436,9 +436,9 @@ function PatientAppointmentTable({ patientUID = null, action = '' }) {
                             View Details
                           </button>
 
-                          {appointment.type === 'FollowUp' &&
-                            appointment.status === 'Pending' && (
-                              <>
+                          {appointment.status === 'Pending' && (
+                            <>
+                              {appointment.type === 'FollowUp' && (
                                 <button
                                   className="btn btn-outline-secondary btn-sm me-2"
                                   onClick={() =>
@@ -447,14 +447,15 @@ function PatientAppointmentTable({ patientUID = null, action = '' }) {
                                 >
                                   Reschedule
                                 </button>
-                                <button
-                                  className="btn btn-outline-secondary btn-sm"
-                                  onClick={() => handleCancel(appointment.id)}
-                                >
-                                  Cancel
-                                </button>
-                              </>
-                            )}
+                              )}
+                              <button
+                                className="btn btn-outline-secondary btn-sm"
+                                onClick={() => handleCancel(appointment.id)}
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          )}
                           {/* {appointment.type === 'FollowUp' &&
                         appointment.status === 'Cancelled' && (
                           <button
@@ -680,18 +681,32 @@ function PatientAppointmentTable({ patientUID = null, action = '' }) {
                         </div>
                       </div>
 
-                      <div
-                        className="alert alert-warning mt-3 d-flex align-items-start"
-                        role="alert"
-                      >
-                        <i className="fa-solid fa-info-circle me-2 mt-1"></i>
-                        <div>
-                          <strong>Important:</strong> Anti-rabies vaccination
-                          appointments cannot be rescheduled or cancelled.
-                          Please ensure you attend all scheduled doses as
-                          prescribed.
+                      {selectedAppointment.status === 'Pending' ? (
+                        <div
+                          className="alert alert-info mt-3 d-flex align-items-start"
+                          role="alert"
+                        >
+                          <i className="fa-solid fa-info-circle me-2 mt-1"></i>
+                          <div>
+                            <strong>Note:</strong> This appointment is still
+                            pending confirmation. You can cancel it if needed.
+                            Once confirmed, cancellation may not be available.
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div
+                          className="alert alert-warning mt-3 d-flex align-items-start"
+                          role="alert"
+                        >
+                          <i className="fa-solid fa-info-circle me-2 mt-1"></i>
+                          <div>
+                            <strong>Important:</strong> Anti-rabies vaccination
+                            appointments are part of a critical treatment
+                            schedule. Please ensure you attend all scheduled
+                            doses as prescribed.
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
