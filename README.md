@@ -110,7 +110,7 @@ _Goal: Build staff tools, integrate everything, conduct final testing, and submi
 | **BE: Staff-side Patient Registration**    | Jerome      | Medium   | Nov 11 (Tue) | **Done** |
 | **BE: Cleaning and Polishing Code**        | Jerome      | Medium   | Nov 12 (Wed) | **Done** |
 | **QA: Full System Functional Testing**     | Giga        | **High** | Nov 13 (Thu) | **Done** |
-| **Final Project Submission**               | Jerome      | **High** | Nov 14 (Fri) | Pending |
+| **Final Project Submission**               | Jerome      | **High** | Nov 14 (Fri) | **Done** |
 
 ---
 
